@@ -6,16 +6,23 @@ signal input_direction_changed(direction: Vector2)
 
 @onready var attack_area: Area2D = $AttackArea
 @onready var attack_shape: CollisionShape2D = $AttackArea/CollisionShape2D
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var player_visual: Node2D = $PlayerVisual
 @onready var attack_timer: Timer = $AttackTimer
 @onready var weapon_pivot: Node2D = $WeaponPivot
 @onready var blade: Sprite2D = $WeaponPivot/Blade
+
+@onready var left_leg: Polygon2D = $PlayerVisual/LeftLeg
+@onready var right_leg: Polygon2D = $PlayerVisual/RightLeg
+@onready var left_arm: Polygon2D = $PlayerVisual/LeftArm
+@onready var right_arm: Polygon2D = $PlayerVisual/RightArm
+@onready var body: Polygon2D = $PlayerVisual/Body
 
 var input_direction: Vector2 = Vector2.ZERO
 var can_attack: bool = true
 var grasses_in_range: Array[Node2D] = []
 var target_weapon_angle: float = 0.0
 var is_swinging: bool = false
+var walk_time: float = 0.0
 
 func _ready() -> void:
 	attack_area.area_entered.connect(_on_grass_entered)
@@ -33,7 +40,10 @@ func _process(delta: float) -> void:
 	if input_direction != Vector2.ZERO:
 		update_sprite_direction()
 		update_weapon_direction(delta)
+		update_walk_animation(delta)
 		try_attack()
+	else:
+		reset_walk_animation(delta)
 
 func _physics_process(_delta: float) -> void:
 	pass
@@ -48,9 +58,33 @@ func get_input_direction() -> Vector2:
 
 func update_sprite_direction() -> void:
 	if input_direction.x < 0:
-		sprite.flip_h = true
+		player_visual.scale.x = -1
 	elif input_direction.x > 0:
-		sprite.flip_h = false
+		player_visual.scale.x = 1
+
+func update_walk_animation(delta: float) -> void:
+	walk_time += delta * 12.0
+
+	var leg_swing = sin(walk_time) * 0.4
+	var arm_swing = sin(walk_time) * 0.3
+	var body_bob = abs(sin(walk_time * 2)) * 2.0
+
+	left_leg.rotation = leg_swing
+	right_leg.rotation = -leg_swing
+
+	left_arm.rotation = -arm_swing
+	right_arm.rotation = arm_swing
+
+	body.position.y = -body_bob
+
+func reset_walk_animation(delta: float) -> void:
+	var lerp_speed = delta * 8.0
+
+	left_leg.rotation = lerp(left_leg.rotation, 0.0, lerp_speed)
+	right_leg.rotation = lerp(right_leg.rotation, 0.0, lerp_speed)
+	left_arm.rotation = lerp(left_arm.rotation, 0.0, lerp_speed)
+	right_arm.rotation = lerp(right_arm.rotation, 0.0, lerp_speed)
+	body.position.y = lerp(body.position.y, 0.0, lerp_speed)
 
 func update_weapon_direction(delta: float) -> void:
 	if is_swinging:
