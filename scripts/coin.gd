@@ -1,5 +1,7 @@
 extends Area2D
 
+const FloatingTextScene = preload("res://scenes/ui/floating_text.tscn")
+
 @export var value: int = 1
 @export var magnet_speed: float = 600.0
 @export var pickup_delay: float = 0.3
@@ -7,6 +9,7 @@ extends Area2D
 var player: Node2D = null
 var can_pickup: bool = false
 var is_being_collected: bool = false
+var is_collected: bool = false
 var velocity: Vector2 = Vector2.ZERO
 
 @onready var visual: Node2D = $Visual
@@ -65,7 +68,13 @@ func spawn_animation() -> void:
 		tween2.tween_property(visual, "scale", Vector2(1.0, 1.0), 0.1)
 
 func collect() -> void:
-	GameManager.add_money(value)
+	if is_collected:
+		return
+	is_collected = true
+
+	var breakdown = GameManager.add_money_with_breakdown(value)
+
+	spawn_floating_text(breakdown.base, breakdown.combo_bonus)
 
 	if visual:
 		var tween = create_tween()
@@ -75,6 +84,13 @@ func collect() -> void:
 		await tween.finished
 
 	queue_free()
+
+func spawn_floating_text(base_amount: int, combo_bonus: int) -> void:
+	var floating_text = FloatingTextScene.instantiate()
+	floating_text.position = position
+	floating_text.setup(base_amount, combo_bonus)
+
+	get_parent().add_child(floating_text)
 
 func set_value(new_value: int) -> void:
 	value = new_value
