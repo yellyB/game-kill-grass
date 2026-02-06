@@ -11,6 +11,7 @@ var can_pickup: bool = false
 var is_being_collected: bool = false
 var is_collected: bool = false
 var velocity: Vector2 = Vector2.ZERO
+var combo_at_cut: int = 0
 
 @onready var visual: Node2D = $Visual
 @onready var collision: CollisionShape2D = $CollisionShape2D
@@ -72,7 +73,7 @@ func collect() -> void:
 		return
 	is_collected = true
 
-	var breakdown = GameManager.add_money_with_breakdown(value)
+	var breakdown = GameManager.add_money_with_breakdown(value, combo_at_cut)
 
 	spawn_floating_text(breakdown.base, breakdown.combo_bonus)
 
@@ -88,13 +89,16 @@ func collect() -> void:
 func spawn_floating_text(base_amount: int, combo_bonus: int) -> void:
 	var floating_text = FloatingTextScene.instantiate()
 	floating_text.position = position
-	floating_text.setup(base_amount, combo_bonus)
 
 	get_parent().add_child(floating_text)
+	floating_text.setup(base_amount, combo_bonus)
 
 func set_value(new_value: int) -> void:
 	value = new_value
 	update_visual()
+
+func set_combo_at_cut(combo: int) -> void:
+	combo_at_cut = combo
 
 func update_visual() -> void:
 	if not visual:
