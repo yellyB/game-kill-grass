@@ -33,7 +33,8 @@ func update_chunks() -> void:
 	if not player:
 		return
 
-	var player_chunk = get_chunk_coord(player.global_position)
+	var relative_player_pos = player.global_position - global_position
+	var player_chunk = get_chunk_coord(relative_player_pos)
 	var chunks_to_load: Array[Vector2i] = []
 	var chunks_to_keep: Dictionary = {}
 

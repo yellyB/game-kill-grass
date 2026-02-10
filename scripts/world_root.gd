@@ -21,5 +21,5 @@ func _process(delta: float) -> void:
 	if current_direction != Vector2.ZERO:
 		position -= current_direction * move_speed * delta
 
-	if background and player:
-		background.position = -position + Vector2(-3000, -3000)
+	if background:
+		background.global_position = Vector2(-3000, -3000)
