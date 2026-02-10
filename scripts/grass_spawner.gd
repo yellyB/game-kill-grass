@@ -3,19 +3,24 @@ extends Node2D
 @export var grass_scene: PackedScene
 @export var chunk_size: float = 400.0
 @export var render_distance: int = 3
-@export var grass_per_chunk: int = 8
-@export var min_spacing: float = 60.0
 
 var loaded_chunks: Dictionary = {}
 var player: Node2D = null
+var current_density_level: int = -1
 
 func _ready() -> void:
 	call_deferred("find_player")
+	GameManager.upgrade_purchased.connect(_on_upgrade_purchased)
 
 func find_player() -> void:
 	player = get_tree().get_first_node_in_group("player")
 	if player:
+		current_density_level = GameManager.get_grass_density_level()
 		update_chunks()
+
+func _on_upgrade_purchased(upgrade_type: String, _level: int) -> void:
+	if upgrade_type == "grass_density":
+		reload_all_chunks()
 
 func _process(_delta: float) -> void:
 	if player:
@@ -65,8 +70,11 @@ func load_chunk(chunk_coord: Vector2i) -> void:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = hash(chunk_coord)
 
-	for i in grass_per_chunk:
-		var pos = get_random_position_in_chunk(chunk_origin, spawned_positions, rng)
+	var grass_count = GameManager.get_grass_per_chunk()
+	var min_spacing = GameManager.get_grass_min_spacing()
+
+	for i in grass_count:
+		var pos = get_random_position_in_chunk(chunk_origin, spawned_positions, rng, min_spacing)
 		if pos != Vector2.INF:
 			var grass = spawn_grass_at(pos, rng)
 			if grass:
@@ -86,8 +94,8 @@ func unload_chunk(chunk_coord: Vector2i) -> void:
 
 	loaded_chunks.erase(chunk_coord)
 
-func get_random_position_in_chunk(chunk_origin: Vector2, existing: Array[Vector2], rng: RandomNumberGenerator) -> Vector2:
-	var max_attempts = 20
+func get_random_position_in_chunk(chunk_origin: Vector2, existing: Array[Vector2], rng: RandomNumberGenerator, min_spacing: float) -> Vector2:
+	var max_attempts = 30
 
 	for _attempt in max_attempts:
 		var pos = Vector2(
@@ -105,6 +113,15 @@ func get_random_position_in_chunk(chunk_origin: Vector2, existing: Array[Vector2
 			return pos
 
 	return Vector2.INF
+
+func reload_all_chunks() -> void:
+	var all_coords = loaded_chunks.keys().duplicate()
+	for chunk_coord in all_coords:
+		unload_chunk(chunk_coord)
+
+	current_density_level = GameManager.get_grass_density_level()
+
+	update_chunks()
 
 func spawn_grass_at(pos: Vector2, _rng: RandomNumberGenerator) -> Node:
 	if not grass_scene:
