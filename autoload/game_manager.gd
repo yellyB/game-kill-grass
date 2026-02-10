@@ -27,8 +27,8 @@ func _ready() -> void:
 func _init_grass_data() -> void:
 	var normal_grass = GrassData.new()
 	normal_grass.grass_name = "기본풀"
-	normal_grass.max_health = 1
-	normal_grass.regen_time = 3.0
+	normal_grass.max_health = 4
+	normal_grass.regen_time = 12.0
 	normal_grass.min_drop_value = 1
 	normal_grass.max_drop_value = 1
 	normal_grass.drop_chance = 1.0
@@ -37,8 +37,8 @@ func _init_grass_data() -> void:
 
 	var tough_grass = GrassData.new()
 	tough_grass.grass_name = "강한풀"
-	tough_grass.max_health = 3
-	tough_grass.regen_time = 5.0
+	tough_grass.max_health = 12
+	tough_grass.regen_time = 12.0
 	tough_grass.min_drop_value = 5
 	tough_grass.max_drop_value = 5
 	tough_grass.drop_chance = 1.0
@@ -47,8 +47,8 @@ func _init_grass_data() -> void:
 
 	var strong_grass = GrassData.new()
 	strong_grass.grass_name = "완전 센풀"
-	strong_grass.max_health = 6
-	strong_grass.regen_time = 8.0
+	strong_grass.max_health = 24
+	strong_grass.regen_time = 12.0
 	strong_grass.min_drop_value = 30
 	strong_grass.max_drop_value = 30
 	strong_grass.drop_chance = 1.0
@@ -57,7 +57,7 @@ func _init_grass_data() -> void:
 
 	var golden_grass = GrassData.new()
 	golden_grass.grass_name = "황금풀"
-	golden_grass.max_health = 15
+	golden_grass.max_health = 60
 	golden_grass.regen_time = 30.0
 	golden_grass.min_drop_value = 100
 	golden_grass.max_drop_value = 500
