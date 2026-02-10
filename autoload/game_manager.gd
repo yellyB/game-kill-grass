@@ -45,6 +45,16 @@ func _init_grass_data() -> void:
 	tough_grass.color = Color(0.15, 0.5, 0.35)
 	tough_grass.cut_color = Color(0.3, 0.35, 0.25)
 
+	var strong_grass = GrassData.new()
+	strong_grass.grass_name = "완전 센풀"
+	strong_grass.max_health = 6
+	strong_grass.regen_time = 8.0
+	strong_grass.min_drop_value = 15
+	strong_grass.max_drop_value = 30
+	strong_grass.drop_chance = 1.0
+	strong_grass.color = Color(0.1, 0.35, 0.5)
+	strong_grass.cut_color = Color(0.2, 0.3, 0.35)
+
 	var golden_grass = GrassData.new()
 	golden_grass.grass_name = "황금풀"
 	golden_grass.max_health = 15
@@ -57,27 +67,39 @@ func _init_grass_data() -> void:
 
 	grass_data_list.append(normal_grass)
 	grass_data_list.append(tough_grass)
+	grass_data_list.append(strong_grass)
 	grass_data_list.append(golden_grass)
 
 func get_random_grass_data() -> GrassData:
 	var quality_level = upgrade_grass_quality
 
-	var golden_chance = 0.0
-	if quality_level >= 10:
-		golden_chance = min((quality_level - 10) * 0.003, 0.03)
-
-	var tough_ratio = min(quality_level / 18.0, 1.0)
-
-	var remaining = 1.0 - golden_chance
-	var tough_chance = remaining * tough_ratio
+	const GOLDEN_CHANCE = 0.02
 
 	var roll = randf()
-	if roll < golden_chance:
-		return grass_data_list[2]
-	elif roll < golden_chance + tough_chance:
+	if roll < GOLDEN_CHANCE:
+		return grass_data_list[3]
+
+	var progress = min(quality_level / 27.0, 1.0)
+
+	var normal_chance: float
+	var tough_chance: float
+
+	if progress < 0.5:
+		var t = progress * 2.0
+		normal_chance = 1.0 - t
+		tough_chance = t
+	else:
+		var t = (progress - 0.5) * 2.0
+		normal_chance = 0.0
+		tough_chance = 1.0 - t
+
+	var remaining_roll = randf()
+	if remaining_roll < normal_chance:
+		return grass_data_list[0]
+	elif remaining_roll < normal_chance + tough_chance:
 		return grass_data_list[1]
 	else:
-		return grass_data_list[0]
+		return grass_data_list[2]
 
 func add_money(amount: int) -> void:
 	money += amount
