@@ -2,6 +2,8 @@ extends Node
 
 signal weapon_changed(weapon_level: int)
 
+var weapon_textures: Array[Texture2D] = []
+
 const WEAPONS = [
   {
     "name": "낡은 낫",
@@ -13,7 +15,8 @@ const WEAPONS = [
     "color": Color(0.6, 0.5, 0.4),
     "visual_type": "scythe",
     "blade_length": 60,
-    "blade_width": 12
+    "blade_width": 12,
+    "texture": "res://resources/images/weapon/1단계_낡은낫.png"
   },
   {
     "name": "날 선 낫",
@@ -25,7 +28,8 @@ const WEAPONS = [
     "color": Color(0.7, 0.7, 0.75),
     "visual_type": "scythe",
     "blade_length": 70,
-    "blade_width": 14
+    "blade_width": 14,
+    "texture": "res://resources/images/weapon/2단계_날선낫.png"
   },
   {
     "name": "무거운 낫",
@@ -37,7 +41,8 @@ const WEAPONS = [
     "color": Color(0.4, 0.4, 0.5),
     "visual_type": "heavy_scythe",
     "blade_length": 85,
-    "blade_width": 20
+    "blade_width": 20,
+    "texture": "res://resources/images/weapon/3단계_무거운낫.png"
   },
   {
     "name": "이중 낫",
@@ -49,7 +54,8 @@ const WEAPONS = [
     "color": Color(0.5, 0.6, 0.7),
     "visual_type": "double_scythe",
     "blade_length": 55,
-    "blade_width": 12
+    "blade_width": 12,
+    "texture": "res://resources/images/weapon/4단계_이중낫.png"
   },
   {
     "name": "회전 예초낫",
@@ -61,7 +67,8 @@ const WEAPONS = [
     "color": Color(0.3, 0.7, 0.4),
     "visual_type": "spinner",
     "blade_length": 50,
-    "blade_width": 8
+    "blade_width": 8,
+    "texture": "res://resources/images/weapon/5단계_회전예초낫.png"
   },
   {
     "name": "제초 기계",
@@ -73,7 +80,8 @@ const WEAPONS = [
     "color": Color(0.8, 0.5, 0.2),
     "visual_type": "machine",
     "blade_length": 40,
-    "blade_width": 40
+    "blade_width": 40,
+    "texture": "res://resources/images/weapon/6단계_제초기계.png"
   },
   {
     "name": "분쇄 예초기",
@@ -85,7 +93,8 @@ const WEAPONS = [
     "color": Color(0.9, 0.3, 0.3),
     "visual_type": "machine",
     "blade_length": 55,
-    "blade_width": 55
+    "blade_width": 55,
+    "texture": "res://resources/images/weapon/7단계_분쇄예초기.png"
   },
   {
     "name": "화염 제초기",
@@ -97,7 +106,8 @@ const WEAPONS = [
     "color": Color(1.0, 0.4, 0.1),
     "visual_type": "flamethrower",
     "blade_length": 70,
-    "blade_width": 25
+    "blade_width": 25,
+    "texture": "res://resources/images/weapon/8단계_회염제초기.png"
   },
   {
     "name": "재앙 장치",
@@ -109,7 +119,8 @@ const WEAPONS = [
     "color": Color(0.6, 0.2, 0.8),
     "visual_type": "device",
     "blade_length": 50,
-    "blade_width": 50
+    "blade_width": 50,
+    "texture": "res://resources/images/weapon/9단계_재앙장치.png"
   },
   {
     "name": "세계 정리자",
@@ -121,7 +132,8 @@ const WEAPONS = [
     "color": Color(1.0, 0.9, 0.3),
     "visual_type": "orb",
     "blade_length": 60,
-    "blade_width": 60
+    "blade_width": 60,
+    "texture": "res://resources/images/weapon/10단계_세계정리자.png"
   }
 ]
 
@@ -129,6 +141,12 @@ var current_weapon_level: int = 0
 
 func _ready() -> void:
   process_mode = Node.PROCESS_MODE_ALWAYS
+  _load_weapon_textures()
+
+func _load_weapon_textures() -> void:
+  for weapon in WEAPONS:
+    var texture = load(weapon.texture) as Texture2D
+    weapon_textures.append(texture)
 
 func get_current_weapon() -> Dictionary:
   return WEAPONS[current_weapon_level]
@@ -187,6 +205,11 @@ func get_blade_length() -> int:
 
 func get_blade_width() -> int:
   return get_current_weapon().blade_width
+
+func get_weapon_texture() -> Texture2D:
+  if current_weapon_level < weapon_textures.size():
+    return weapon_textures[current_weapon_level]
+  return null
 
 func is_max_level() -> bool:
   return current_weapon_level >= WEAPONS.size() - 1
