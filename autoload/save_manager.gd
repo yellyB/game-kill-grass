@@ -57,7 +57,7 @@ func reset_all_data() -> void:
 	GameManager.upgrade_attack_range = 0
 	GameManager.upgrade_drop_rate = 0
 	GameManager.upgrade_magnet_range = 0
-	GameManager.upgrade_bonus_rate = 0
+	GameManager.upgrade_grass_quality = 0
 	GameManager.money_changed.emit(0)
 	WeaponManager.current_weapon_level = 0
 	WeaponManager.weapon_changed.emit(0)

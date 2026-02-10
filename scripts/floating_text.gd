@@ -1,7 +1,6 @@
 extends Node2D
 
-@onready var base_label: Label = $BaseLabel
-@onready var bonus_label: Label = $BonusLabel
+@onready var amount_label: Label = $AmountLabel
 
 var float_speed: float = 80.0
 var fade_duration: float = 1.0
@@ -14,18 +13,15 @@ func _process(delta: float) -> void:
 	position.y -= float_speed * delta
 	position += spread_offset * delta
 
-func setup(base_amount: int, bonus_amount: int) -> void:
-	if base_label:
-		base_label.text = "+%d" % base_amount
-		base_label.modulate = Color(1, 0.9, 0.3)
-
-	if bonus_label:
-		if bonus_amount > 0:
-			bonus_label.text = "+%d" % bonus_amount
-			bonus_label.modulate = Color(0.3, 1, 0.5)
-			bonus_label.visible = true
+func setup(amount: int) -> void:
+	if amount_label:
+		amount_label.text = "+%d" % amount
+		if amount >= 10:
+			amount_label.modulate = Color(1, 0.85, 0.0)
+		elif amount >= 5:
+			amount_label.modulate = Color(0.75, 0.75, 0.85)
 		else:
-			bonus_label.visible = false
+			amount_label.modulate = Color(1, 0.9, 0.3)
 
 func animate() -> void:
 	scale = Vector2(0.5, 0.5)

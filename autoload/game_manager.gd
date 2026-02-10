@@ -6,7 +6,7 @@ var upgrade_attack_speed: int = 0
 var upgrade_attack_range: int = 0
 var upgrade_drop_rate: int = 0
 var upgrade_magnet_range: int = 0
-var upgrade_bonus_rate: int = 0
+var upgrade_grass_quality: int = 0
 
 const BASE_UPGRADE_COST: int = 100
 const UPGRADE_COST_MULTIPLIER: float = 1.5
@@ -17,34 +17,17 @@ var base_drop_rate: float = 1.0
 var base_magnet_range: float = 75.0
 
 signal money_changed(new_amount: int)
-signal bonus_triggered(bonus_amount: int)
 signal upgrade_purchased(upgrade_type: String, level: int)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 func add_money(amount: int) -> void:
-	var bonus_mult = get_bonus_rate()
-	var final_amount = int(amount * bonus_mult)
-	money += final_amount
+	money += amount
 	money_changed.emit(money)
 
-func add_money_with_breakdown(amount: int) -> Dictionary:
-	var bonus_mult = get_bonus_rate() - 1.0
-	var bonus_amount = int(amount * bonus_mult)
-	var total = amount + bonus_amount
-	money += total
-	money_changed.emit(money)
-	if bonus_amount > 0:
-		bonus_triggered.emit(bonus_amount)
-	return {
-		"base": amount,
-		"bonus": bonus_amount,
-		"total": total
-	}
-
-func get_bonus_rate() -> float:
-	return 1.0 + (upgrade_bonus_rate * 0.05)
+func get_grass_quality_level() -> int:
+	return upgrade_grass_quality
 
 func get_attack_speed() -> float:
 	return base_attack_speed * (1.0 + upgrade_attack_speed * 0.15)
@@ -72,8 +55,8 @@ func purchase_upgrade(upgrade_type: String) -> bool:
 			current_level = upgrade_drop_rate
 		"magnet_range":
 			current_level = upgrade_magnet_range
-		"bonus_rate":
-			current_level = upgrade_bonus_rate
+		"grass_quality":
+			current_level = upgrade_grass_quality
 		_:
 			return false
 
@@ -93,8 +76,8 @@ func purchase_upgrade(upgrade_type: String) -> bool:
 			upgrade_drop_rate += 1
 		"magnet_range":
 			upgrade_magnet_range += 1
-		"bonus_rate":
-			upgrade_bonus_rate += 1
+		"grass_quality":
+			upgrade_grass_quality += 1
 
 	upgrade_purchased.emit(upgrade_type, current_level + 1)
 	return true
@@ -106,7 +89,7 @@ func get_save_data() -> Dictionary:
 		"upgrade_attack_range": upgrade_attack_range,
 		"upgrade_drop_rate": upgrade_drop_rate,
 		"upgrade_magnet_range": upgrade_magnet_range,
-		"upgrade_bonus_rate": upgrade_bonus_rate
+		"upgrade_grass_quality": upgrade_grass_quality
 	}
 
 func load_save_data(data: Dictionary) -> void:
@@ -115,7 +98,7 @@ func load_save_data(data: Dictionary) -> void:
 	upgrade_attack_range = data.get("upgrade_attack_range", 0)
 	upgrade_drop_rate = data.get("upgrade_drop_rate", 0)
 	upgrade_magnet_range = data.get("upgrade_magnet_range", 0)
-	upgrade_bonus_rate = data.get("upgrade_bonus_rate", 0)
+	upgrade_grass_quality = data.get("upgrade_grass_quality", 0)
 	money_changed.emit(money)
 
 func reset_session_data() -> void:

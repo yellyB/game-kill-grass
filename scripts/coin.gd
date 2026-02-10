@@ -72,9 +72,9 @@ func collect() -> void:
 		return
 	is_collected = true
 
-	var breakdown = GameManager.add_money_with_breakdown(value)
+	GameManager.add_money(value)
 
-	spawn_floating_text(breakdown.base, breakdown.bonus)
+	spawn_floating_text(value)
 
 	if visual:
 		var tween = create_tween()
@@ -85,12 +85,12 @@ func collect() -> void:
 
 	queue_free()
 
-func spawn_floating_text(base_amount: int, combo_bonus: int) -> void:
+func spawn_floating_text(amount: int) -> void:
 	var floating_text = FloatingTextScene.instantiate()
 	floating_text.position = position
 
 	get_parent().add_child(floating_text)
-	floating_text.setup(base_amount, combo_bonus)
+	floating_text.setup(amount)
 
 func set_value(new_value: int) -> void:
 	value = new_value

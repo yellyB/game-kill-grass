@@ -115,10 +115,17 @@ func spawn_grass_at(pos: Vector2, rng: RandomNumberGenerator) -> Node:
 	var grass = grass_scene.instantiate()
 	grass.position = pos
 
+	var quality_level = GameManager.get_grass_quality_level()
+	var quality_shift = quality_level * 0.05
+
+	var normal_chance = max(0.70 - quality_shift, 0.20)
+	var tough_chance = min(0.25 + quality_shift * 0.6, 0.50)
+	var golden_chance = min(0.05 + quality_shift * 0.4, 0.30)
+
 	var roll = rng.randf()
-	if roll < 0.7:
+	if roll < normal_chance:
 		grass.grass_data = grass_data_list[0]
-	elif roll < 0.95:
+	elif roll < normal_chance + tough_chance:
 		grass.grass_data = grass_data_list[1]
 	else:
 		grass.grass_data = grass_data_list[2]
