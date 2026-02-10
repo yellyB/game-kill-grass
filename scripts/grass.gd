@@ -136,8 +136,11 @@ func regenerate() -> void:
 	is_cut = false
 	collision.set_deferred("disabled", false)
 
+	grass_data = GameManager.get_random_grass_data()
+
 	if grass_data:
 		current_health = grass_data.max_health
+		regen_timer.wait_time = grass_data.regen_time
 	else:
 		current_health = 1
 
