@@ -1,22 +1,22 @@
 extends CanvasLayer
 
 @onready var money_label: Label = $MoneyContainer/MoneyLabel
-@onready var combo_label: Label = $ComboContainer/ComboLabel
-@onready var combo_container: Control = $ComboContainer
+@onready var bonus_label: Label = $BonusContainer/BonusLabel
+@onready var bonus_container: Control = $BonusContainer
 
 @onready var weapon_label: Label = $StatsContainer/WeaponLabel
 @onready var attack_speed_label: Label = $StatsContainer/AttackSpeedLabel
 @onready var attack_range_label: Label = $StatsContainer/AttackRangeLabel
 @onready var drop_rate_label: Label = $StatsContainer/DropRateLabel
 @onready var magnet_range_label: Label = $StatsContainer/MagnetRangeLabel
+@onready var bonus_rate_label: Label = $StatsContainer/BonusRateLabel
 
 var displayed_money: int = 0
 var target_money: int = 0
 
 func _ready() -> void:
   GameManager.money_changed.connect(_on_money_changed)
-  GameManager.combo_changed.connect(_on_combo_changed)
-  GameManager.combo_ended.connect(_on_combo_ended)
+  GameManager.bonus_triggered.connect(_on_bonus_triggered)
   GameManager.upgrade_purchased.connect(_on_upgrade_purchased)
   WeaponManager.weapon_changed.connect(_on_weapon_changed)
 
@@ -24,7 +24,7 @@ func _ready() -> void:
   target_money = GameManager.money
   update_money_display()
   update_stats_display()
-  combo_container.visible = false
+  bonus_container.visible = false
 
 func _process(delta: float) -> void:
   if displayed_money != target_money:
@@ -42,29 +42,21 @@ func _on_money_changed(new_amount: int) -> void:
   tween.tween_property(money_label, "scale", Vector2(1.2, 1.2), 0.05)
   tween.tween_property(money_label, "scale", Vector2(1.0, 1.0), 0.1)
 
-func _on_combo_changed(new_combo: int) -> void:
-  combo_container.visible = true
-  combo_label.text = "x" + str(new_combo)
+func _on_bonus_triggered(bonus_amount: int) -> void:
+  bonus_container.visible = true
+  bonus_label.text = "+%d" % bonus_amount
+  bonus_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
 
   var tween = create_tween()
-  combo_label.scale = Vector2(1.5, 1.5)
-  tween.tween_property(combo_label, "scale", Vector2(1.0, 1.0), 0.15)
+  bonus_label.scale = Vector2(1.5, 1.5)
+  tween.tween_property(bonus_label, "scale", Vector2(1.0, 1.0), 0.15)
 
-  if new_combo >= 50:
-    combo_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
-  elif new_combo >= 20:
-    combo_label.add_theme_color_override("font_color", Color(1.0, 0.5, 0.0))
-  elif new_combo >= 10:
-    combo_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.0))
-  else:
-    combo_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
-
-func _on_combo_ended() -> void:
-  var tween = create_tween()
-  tween.tween_property(combo_container, "modulate:a", 0.0, 0.3)
-  await tween.finished
-  combo_container.visible = false
-  combo_container.modulate.a = 1.0
+  await get_tree().create_timer(0.5).timeout
+  var fade_tween = create_tween()
+  fade_tween.tween_property(bonus_container, "modulate:a", 0.0, 0.3)
+  await fade_tween.finished
+  bonus_container.visible = false
+  bonus_container.modulate.a = 1.0
 
 func update_money_display() -> void:
   money_label.text = "$" + format_number(displayed_money)
@@ -96,6 +88,7 @@ func update_stats_display() -> void:
   var base_range = GameManager.get_attack_range()
   var drop_mult = GameManager.get_drop_multiplier()
   var magnet_range = GameManager.get_magnet_range()
+  var bonus_rate = GameManager.get_bonus_rate()
 
   var weapon_speed = WeaponManager.get_weapon_speed()
   var weapon_range = WeaponManager.get_weapon_range()
@@ -107,3 +100,4 @@ func update_stats_display() -> void:
   attack_range_label.text = "공격 범위: %.0f" % final_range
   drop_rate_label.text = "드롭률: x%.2f" % drop_mult
   magnet_range_label.text = "수집 범위: %.0f" % magnet_range
+  bonus_rate_label.text = "보상 증가: x%.2f" % bonus_rate

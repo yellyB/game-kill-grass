@@ -69,7 +69,6 @@ func cut() -> void:
 	if drop_value > 0:
 		spawn_coin(drop_value)
 
-	GameManager.add_combo()
 	apply_hitstop()
 
 	if camera and camera.has_method("shake"):
@@ -107,7 +106,6 @@ func spawn_coin(value: int) -> void:
 	var spawn_pos = position + get_parent().position
 	coin.position = spawn_pos
 	coin.set_value(value)
-	coin.set_combo_at_cut(GameManager.combo)
 	var world_root = get_parent().get_parent()
 	world_root.add_child(coin)
 
