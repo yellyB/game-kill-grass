@@ -1,8 +1,8 @@
 shader_type canvas_item;
 
-uniform float sway_speed : hint_range(0.5, 5.0) = 2.0;
-uniform float sway_amount : hint_range(0.0, 0.2) = 0.08;
-uniform float wind_strength : hint_range(0.0, 1.0) = 0.5;
+uniform float sway_speed : hint_range(0.5, 10.0) = 5.0;
+uniform float sway_amount : hint_range(0.0, 0.3) = 0.12;
+uniform float wind_strength : hint_range(0.0, 1.0) = 0.7;
 
 void vertex() {
 	vec2 world_pos = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy;
