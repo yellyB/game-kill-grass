@@ -1,45 +1,82 @@
 extends Node2D
 
-@export var grass_scene: PackedScene
-@export var chunk_size: float = 400.0
-@export var render_distance: int = 3
+signal grass_cut(position: Vector2, value: int)
 
+@export var chunk_size: float = 400.0
+@export var render_distance: int = 2
+
+var multimesh_instance: MultiMeshInstance2D
+var multimesh: MultiMesh
+
+var grass_data: Dictionary = {}
 var loaded_chunks: Dictionary = {}
+
+var grid_cell_size: float = 40.0
+
 var player: Node2D = null
-var current_density_level: int = -1
+var player_attack_area: Area2D = null
 
 func _ready() -> void:
+	setup_multimesh()
 	call_deferred("find_player")
 	GameManager.upgrade_purchased.connect(_on_upgrade_purchased)
+
+func setup_multimesh() -> void:
+	multimesh = MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_2D
+	multimesh.use_colors = true
+	multimesh.mesh = create_grass_mesh()
+	multimesh.instance_count = 0
+
+	multimesh_instance = MultiMeshInstance2D.new()
+	multimesh_instance.multimesh = multimesh
+	add_child(multimesh_instance)
+
+func create_grass_mesh() -> ArrayMesh:
+	var mesh = ArrayMesh.new()
+	var vertices = PackedVector2Array([
+		Vector2(-6, 0),
+		Vector2(6, 0),
+		Vector2(0, -50)
+	])
+	var colors = PackedColorArray([
+		Color(0.3, 0.7, 0.3),
+		Color(0.3, 0.7, 0.3),
+		Color(0.2, 0.5, 0.2)
+	])
+	var arrays = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_COLOR] = colors
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
 
 func find_player() -> void:
 	player = get_tree().get_first_node_in_group("player")
 	if player:
-		current_density_level = GameManager.get_grass_density_level()
+		player_attack_area = player.get_node_or_null("AttackArea")
 		update_chunks()
 
 func _on_upgrade_purchased(upgrade_type: String, _level: int) -> void:
 	if upgrade_type == "grass_density":
-		current_density_level = GameManager.get_grass_density_level()
-		reload_current_chunk()
-
-func _process(_delta: float) -> void:
-	if player:
+		grass_data.clear()
+		loaded_chunks.clear()
 		update_chunks()
 
-func get_chunk_coord(world_pos: Vector2) -> Vector2i:
-	return Vector2i(
-		floori(world_pos.x / chunk_size),
-		floori(world_pos.y / chunk_size)
-	)
-
-func update_chunks() -> void:
+func _process(delta: float) -> void:
 	if not player:
 		return
 
+	update_chunks()
+	process_regen(delta)
+	update_multimesh()
+
+func get_chunk_coord(world_pos: Vector2) -> Vector2i:
+	return Vector2i(floori(world_pos.x / chunk_size), floori(world_pos.y / chunk_size))
+
+func update_chunks() -> void:
 	var relative_player_pos = player.global_position - global_position
 	var player_chunk = get_chunk_coord(relative_player_pos)
-	var chunks_to_load: Array[Vector2i] = []
 	var chunks_to_keep: Dictionary = {}
 
 	for x in range(-render_distance, render_distance + 1):
@@ -47,93 +84,137 @@ func update_chunks() -> void:
 			var chunk_coord = Vector2i(player_chunk.x + x, player_chunk.y + y)
 			chunks_to_keep[chunk_coord] = true
 			if not loaded_chunks.has(chunk_coord):
-				chunks_to_load.append(chunk_coord)
+				load_chunk(chunk_coord)
 
-	var chunks_to_unload: Array[Vector2i] = []
 	for chunk_coord in loaded_chunks.keys():
 		if not chunks_to_keep.has(chunk_coord):
-			chunks_to_unload.append(chunk_coord)
-
-	for chunk_coord in chunks_to_unload:
-		unload_chunk(chunk_coord)
-
-	for chunk_coord in chunks_to_load:
-		load_chunk(chunk_coord)
+			unload_chunk(chunk_coord)
 
 func load_chunk(chunk_coord: Vector2i) -> void:
 	if loaded_chunks.has(chunk_coord):
 		return
 
-	var grass_list: Array[Node] = []
+	var positions: Array[Vector2i] = []
 	var chunk_origin = Vector2(chunk_coord.x * chunk_size, chunk_coord.y * chunk_size)
-	var spawned_positions: Array[Vector2] = []
+
+	var density_level = GameManager.get_grass_density_level()
+	var cell_size = grid_cell_size / (1.0 + density_level * 0.15)
 
 	var rng = RandomNumberGenerator.new()
 	rng.seed = hash(chunk_coord)
 
-	var grass_count = GameManager.get_grass_per_chunk()
-	var min_spacing = GameManager.get_grass_min_spacing()
+	var cells_per_side = int(chunk_size / cell_size)
+	for gx in cells_per_side:
+		for gy in cells_per_side:
+			var world_x = chunk_origin.x + gx * cell_size + rng.randf_range(0, cell_size * 0.7)
+			var world_y = chunk_origin.y + gy * cell_size + rng.randf_range(0, cell_size * 0.7)
+			var grid_pos = Vector2i(int(world_x), int(world_y))
 
-	for i in grass_count:
-		var pos = get_random_position_in_chunk(chunk_origin, spawned_positions, rng, min_spacing)
-		if pos != Vector2.INF:
-			var grass = spawn_grass_at(pos, rng)
-			if grass:
-				grass_list.append(grass)
-				spawned_positions.append(pos)
+			if not grass_data.has(grid_pos):
+				var gd = GameManager.get_random_grass_data()
+				grass_data[grid_pos] = {
+					"cut": false,
+					"type": get_grass_type_index(gd),
+					"health": gd.max_health if gd else 1,
+					"max_health": gd.max_health if gd else 1,
+					"regen_time": gd.regen_time if gd else 5.0,
+					"regen_timer": 0.0,
+					"value": randi_range(gd.min_drop_value, gd.max_drop_value) if gd else 1
+				}
+				positions.append(grid_pos)
 
-	loaded_chunks[chunk_coord] = grass_list
+	loaded_chunks[chunk_coord] = positions
 
 func unload_chunk(chunk_coord: Vector2i) -> void:
 	if not loaded_chunks.has(chunk_coord):
 		return
 
-	var grass_list = loaded_chunks[chunk_coord]
-	for grass in grass_list:
-		if is_instance_valid(grass):
-			grass.queue_free()
+	var positions = loaded_chunks[chunk_coord]
+	for grid_pos in positions:
+		grass_data.erase(grid_pos)
 
 	loaded_chunks.erase(chunk_coord)
 
-func get_random_position_in_chunk(chunk_origin: Vector2, existing: Array[Vector2], rng: RandomNumberGenerator, min_spacing: float) -> Vector2:
-	var max_attempts = 30
+func get_grass_type_index(gd: GrassData) -> int:
+	if not gd:
+		return 0
+	for i in GameManager.grass_data_list.size():
+		if GameManager.grass_data_list[i] == gd:
+			return i
+	return 0
 
-	for _attempt in max_attempts:
-		var pos = Vector2(
-			chunk_origin.x + rng.randf() * chunk_size,
-			chunk_origin.y + rng.randf() * chunk_size
-		)
+func process_regen(delta: float) -> void:
+	for grid_pos in grass_data:
+		var data = grass_data[grid_pos]
+		if data.cut:
+			data.regen_timer += delta
+			if data.regen_timer >= data.regen_time:
+				var gd = GameManager.get_random_grass_data()
+				data.cut = false
+				data.type = get_grass_type_index(gd)
+				data.health = gd.max_health if gd else 1
+				data.max_health = gd.max_health if gd else 1
+				data.regen_time = gd.regen_time if gd else 5.0
+				data.regen_timer = 0.0
+				data.value = randi_range(gd.min_drop_value, gd.max_drop_value) if gd else 1
 
-		var valid = true
-		for existing_pos in existing:
-			if pos.distance_to(existing_pos) < min_spacing:
-				valid = false
-				break
+func update_multimesh() -> void:
+	var visible_grass: Array = []
+	var colors_list: Array = []
 
-		if valid:
-			return pos
+	for grid_pos in grass_data:
+		var data = grass_data[grid_pos]
+		var world_pos = Vector2(grid_pos.x, grid_pos.y)
+		visible_grass.append(world_pos)
 
-	return Vector2.INF
+		if data.cut:
+			colors_list.append(Color(0.5, 0.4, 0.2, 1))
+		else:
+			var gd = GameManager.grass_data_list[data.type] if data.type < GameManager.grass_data_list.size() else null
+			colors_list.append(gd.color if gd else Color(0.3, 0.7, 0.3, 1))
 
-func reload_current_chunk() -> void:
-	if not player:
-		return
+	multimesh.instance_count = visible_grass.size()
 
-	var relative_player_pos = player.global_position - global_position
-	var player_chunk = get_chunk_coord(relative_player_pos)
+	for i in visible_grass.size():
+		var t = Transform2D()
+		t.origin = visible_grass[i]
+		if i < grass_data.size():
+			var grid_pos = Vector2i(int(visible_grass[i].x), int(visible_grass[i].y))
+			if grass_data.has(grid_pos) and grass_data[grid_pos].cut:
+				t = t.scaled(Vector2(1.5, 0.3))
+		multimesh.set_instance_transform_2d(i, t)
+		multimesh.set_instance_color(i, colors_list[i])
 
-	if loaded_chunks.has(player_chunk):
-		unload_chunk(player_chunk)
-		load_chunk(player_chunk)
+func attack_grass_in_area(center: Vector2, radius: float) -> int:
+	var total_value = 0
+	var attacked_positions: Array = []
 
-func spawn_grass_at(pos: Vector2, _rng: RandomNumberGenerator) -> Node:
-	if not grass_scene:
-		return null
+	for grid_pos in grass_data:
+		var data = grass_data[grid_pos]
+		if data.cut:
+			continue
 
-	var grass = grass_scene.instantiate()
-	grass.position = pos
+		var world_pos = Vector2(grid_pos.x, grid_pos.y)
+		var distance = center.distance_to(world_pos)
 
-	grass.grass_data = GameManager.get_random_grass_data()
+		if distance <= radius:
+			data.health -= 1
+			if data.health <= 0:
+				data.cut = true
+				data.regen_timer = 0.0
+				total_value += data.value
+				attacked_positions.append(world_pos)
 
-	add_child(grass)
-	return grass
+	for pos in attacked_positions:
+		var grid_pos = Vector2i(int(pos.x), int(pos.y))
+		if grass_data.has(grid_pos):
+			spawn_coin(pos, grass_data[grid_pos].value)
+
+	return total_value
+
+func spawn_coin(pos: Vector2, value: int) -> void:
+	var CoinScene = preload("res://scenes/world/coin.tscn")
+	var coin = CoinScene.instantiate()
+	coin.position = pos
+	coin.set_value(value)
+	get_parent().add_child(coin)
