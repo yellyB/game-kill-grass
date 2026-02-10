@@ -113,8 +113,10 @@ func load_chunk(chunk_coord: Vector2i) -> void:
 	var cells_per_side = int(chunk_size / cell_size)
 	for gx in cells_per_side:
 		for gy in cells_per_side:
-			var world_x = chunk_origin.x + gx * cell_size + rng.randf_range(0, cell_size * 0.7)
-			var world_y = chunk_origin.y + gy * cell_size + rng.randf_range(0, cell_size * 0.7)
+			var offset_x = rng.randf_range(-cell_size * 0.3, cell_size * 0.9)
+			var offset_y = rng.randf_range(-cell_size * 0.3, cell_size * 0.9)
+			var world_x = chunk_origin.x + gx * cell_size + cell_size * 0.5 + offset_x
+			var world_y = chunk_origin.y + gy * cell_size + cell_size * 0.5 + offset_y
 			var grid_pos = Vector2i(int(world_x), int(world_y))
 
 			if not grass_data.has(grid_pos):
