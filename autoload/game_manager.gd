@@ -5,6 +5,7 @@ var money: int = 0
 var upgrade_grass_density: int = 0
 var upgrade_magnet_range: int = 0
 var upgrade_grass_quality: int = 0
+var upgrade_grass_regen: int = 0
 
 const BASE_UPGRADE_COST: int = 100
 const UPGRADE_COST_MULTIPLIER: float = 1.5
@@ -12,6 +13,7 @@ const UPGRADE_COST_MULTIPLIER: float = 1.5
 var base_magnet_range: float = 75.0
 
 const MAX_DENSITY_LEVEL: int = 10
+const MAX_REGEN_LEVEL: int = 10
 const BASE_GRASS_PER_CHUNK: int = 8
 const BASE_MIN_SPACING: float = 60.0
 
@@ -28,7 +30,7 @@ func _init_grass_data() -> void:
 	var normal_grass = GrassData.new()
 	normal_grass.grass_name = "기본풀"
 	normal_grass.max_health = 4
-	normal_grass.regen_time = 12.0
+	normal_grass.regen_time = 23.0
 	normal_grass.min_drop_value = 1
 	normal_grass.max_drop_value = 1
 	normal_grass.drop_chance = 1.0
@@ -38,7 +40,7 @@ func _init_grass_data() -> void:
 	var tough_grass = GrassData.new()
 	tough_grass.grass_name = "강한풀"
 	tough_grass.max_health = 12
-	tough_grass.regen_time = 12.0
+	tough_grass.regen_time = 23.0
 	tough_grass.min_drop_value = 5
 	tough_grass.max_drop_value = 5
 	tough_grass.drop_chance = 1.0
@@ -48,7 +50,7 @@ func _init_grass_data() -> void:
 	var strong_grass = GrassData.new()
 	strong_grass.grass_name = "완전 센풀"
 	strong_grass.max_health = 24
-	strong_grass.regen_time = 12.0
+	strong_grass.regen_time = 23.0
 	strong_grass.min_drop_value = 30
 	strong_grass.max_drop_value = 30
 	strong_grass.drop_chance = 1.0
@@ -120,6 +122,9 @@ func get_grass_density_level() -> int:
 func get_magnet_range() -> float:
 	return base_magnet_range * (1.0 + upgrade_magnet_range * 0.3)
 
+func get_grass_regen_time(base_time: float) -> float:
+	return base_time - (upgrade_grass_regen * 2.0)
+
 func get_upgrade_cost(current_level: int) -> int:
 	return int(BASE_UPGRADE_COST * pow(UPGRADE_COST_MULTIPLIER, current_level))
 
@@ -134,6 +139,9 @@ func purchase_upgrade(upgrade_type: String) -> bool:
 			current_level = upgrade_magnet_range
 		"grass_quality":
 			current_level = upgrade_grass_quality
+		"grass_regen":
+			current_level = upgrade_grass_regen
+			max_level = MAX_REGEN_LEVEL
 		_:
 			return false
 
@@ -154,6 +162,8 @@ func purchase_upgrade(upgrade_type: String) -> bool:
 			upgrade_magnet_range += 1
 		"grass_quality":
 			upgrade_grass_quality += 1
+		"grass_regen":
+			upgrade_grass_regen += 1
 
 	upgrade_purchased.emit(upgrade_type, current_level + 1)
 	return true
@@ -163,7 +173,8 @@ func get_save_data() -> Dictionary:
 		"money": money,
 		"upgrade_grass_density": upgrade_grass_density,
 		"upgrade_magnet_range": upgrade_magnet_range,
-		"upgrade_grass_quality": upgrade_grass_quality
+		"upgrade_grass_quality": upgrade_grass_quality,
+		"upgrade_grass_regen": upgrade_grass_regen
 	}
 
 func load_save_data(data: Dictionary) -> void:
@@ -171,6 +182,7 @@ func load_save_data(data: Dictionary) -> void:
 	upgrade_grass_density = data.get("upgrade_grass_density", 0)
 	upgrade_magnet_range = data.get("upgrade_magnet_range", 0)
 	upgrade_grass_quality = data.get("upgrade_grass_quality", 0)
+	upgrade_grass_regen = data.get("upgrade_grass_regen", 0)
 	money_changed.emit(money)
 
 func reset_session_data() -> void:
