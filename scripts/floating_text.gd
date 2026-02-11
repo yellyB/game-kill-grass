@@ -20,7 +20,7 @@ func _process(delta: float) -> void:
 
 func setup(amount: int) -> void:
 	if amount_label:
-		amount_label.text = "+%d" % amount
+		amount_label.text = "+%s" % format_number(amount)
 		apply_color(amount)
 
 func animate() -> void:
@@ -43,7 +43,7 @@ func animate() -> void:
 func start_batch(amount: int) -> void:
 	is_batch_mode = true
 	if amount_label:
-		amount_label.text = "+%d" % amount
+		amount_label.text = "+%s" % format_number(amount)
 		apply_color(amount)
 	scale = Vector2(0.5, 0.5)
 	var tween = create_tween()
@@ -51,7 +51,7 @@ func start_batch(amount: int) -> void:
 
 func update_batch(total: int) -> void:
 	if amount_label:
-		amount_label.text = "+%d" % total
+		amount_label.text = "+%s" % format_number(total)
 		apply_color(total)
 	bump_animation()
 
@@ -80,3 +80,14 @@ func apply_color(amount: int) -> void:
 		amount_label.modulate = Color(0.75, 0.75, 0.85)
 	else:
 		amount_label.modulate = Color(1, 0.9, 0.3)
+
+func format_number(num: int) -> String:
+	var str_num = str(num)
+	var result = ""
+	var count = 0
+	for i in range(str_num.length() - 1, -1, -1):
+		if count > 0 and count % 3 == 0:
+			result = "," + result
+		result = str_num[i] + result
+		count += 1
+	return result
