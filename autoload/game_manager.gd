@@ -3,6 +3,8 @@ extends Node
 var money: int = 0
 var session_money: int = 0
 
+var inventory: Dictionary = {}
+
 var upgrade_grass_density: int = 0
 var upgrade_magnet_range: int = 0
 var upgrade_grass_quality: int = 0
@@ -23,6 +25,8 @@ var grass_data_list: Array[GrassData] = []
 signal money_changed(new_amount: int)
 signal session_money_changed(new_amount: int)
 signal upgrade_purchased(upgrade_type: String, level: int)
+signal item_added(item_id: String, count: int)
+signal inventory_changed()
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -170,13 +174,25 @@ func purchase_upgrade(upgrade_type: String) -> bool:
 	upgrade_purchased.emit(upgrade_type, current_level + 1)
 	return true
 
+func add_item(item_id: String, count: int = 1) -> void:
+	if inventory.has(item_id):
+		inventory[item_id] += count
+	else:
+		inventory[item_id] = count
+	item_added.emit(item_id, inventory[item_id])
+	inventory_changed.emit()
+
+func get_item_count(item_id: String) -> int:
+	return inventory.get(item_id, 0)
+
 func get_save_data() -> Dictionary:
 	return {
 		"money": money,
 		"upgrade_grass_density": upgrade_grass_density,
 		"upgrade_magnet_range": upgrade_magnet_range,
 		"upgrade_grass_quality": upgrade_grass_quality,
-		"upgrade_grass_regen": upgrade_grass_regen
+		"upgrade_grass_regen": upgrade_grass_regen,
+		"inventory": inventory
 	}
 
 func load_save_data(data: Dictionary) -> void:
@@ -185,7 +201,9 @@ func load_save_data(data: Dictionary) -> void:
 	upgrade_magnet_range = data.get("upgrade_magnet_range", 0)
 	upgrade_grass_quality = data.get("upgrade_grass_quality", 0)
 	upgrade_grass_regen = data.get("upgrade_grass_regen", 0)
+	inventory = data.get("inventory", {})
 	money_changed.emit(money)
+	inventory_changed.emit()
 
 func finalize_session() -> void:
 	money += session_money
