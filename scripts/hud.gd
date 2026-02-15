@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 @onready var money_label: Label = $MoneyContainer/MoneyLabel
+@onready var item_notif_container: VBoxContainer = $ItemNotifContainer
 
 @onready var weapon_label: Label = $StatsContainer/WeaponLabel
 @onready var weapon_stats_label: Label = $StatsContainer/WeaponStatsLabel
@@ -16,6 +17,7 @@ var target_money: int = 0
 func _ready() -> void:
   GameManager.session_money_changed.connect(_on_session_money_changed)
   GameManager.upgrade_purchased.connect(_on_upgrade_purchased)
+  GameManager.item_added.connect(_on_item_added)
   WeaponManager.weapon_changed.connect(_on_weapon_changed)
 
   displayed_money = GameManager.session_money
@@ -99,3 +101,18 @@ func _on_reset_btn_pressed() -> void:
 
 func _on_add_money_btn_pressed() -> void:
   GameManager.add_money(100000)
+
+func _on_item_added(item_id: String, _total_count: int) -> void:
+  var label = Label.new()
+  label.text = "+ %s" % item_id
+  label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+  label.add_theme_font_size_override("font_size", 72)
+  label.add_theme_color_override("font_color", Color(1, 0.9, 0.4))
+  label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+  label.add_theme_constant_override("outline_size", 3)
+  item_notif_container.add_child(label)
+
+  var tween = create_tween()
+  tween.tween_interval(1.5)
+  tween.tween_property(label, "modulate:a", 0.0, 0.5)
+  tween.tween_callback(label.queue_free)
