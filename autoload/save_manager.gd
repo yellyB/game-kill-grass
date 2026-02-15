@@ -58,6 +58,7 @@ func reset_all_data() -> void:
 	GameManager.upgrade_grass_quality = 0
 	GameManager.upgrade_grass_regen = 0
 	GameManager.inventory = {}
+	GameManager.discovered_items = []
 	GameManager.money_changed.emit(0)
 	GameManager.inventory_changed.emit()
 	WeaponManager.current_weapon_level = 0

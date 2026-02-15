@@ -4,6 +4,7 @@ var money: int = 0
 var session_money: int = 0
 
 var inventory: Dictionary = {}
+var discovered_items: Array = []
 
 var upgrade_grass_density: int = 0
 var upgrade_magnet_range: int = 0
@@ -175,6 +176,8 @@ func purchase_upgrade(upgrade_type: String) -> bool:
 	return true
 
 func add_item(item_id: String, count: int = 1) -> void:
+	if item_id not in discovered_items:
+		discovered_items.append(item_id)
 	if inventory.has(item_id):
 		inventory[item_id] += count
 	else:
@@ -182,8 +185,19 @@ func add_item(item_id: String, count: int = 1) -> void:
 	item_added.emit(item_id, inventory[item_id])
 	inventory_changed.emit()
 
+func remove_item(item_id: String, count: int = 1) -> bool:
+	var current = inventory.get(item_id, 0)
+	if current < count:
+		return false
+	inventory[item_id] = current - count
+	inventory_changed.emit()
+	return true
+
 func get_item_count(item_id: String) -> int:
 	return inventory.get(item_id, 0)
+
+func is_item_discovered(item_id: String) -> bool:
+	return item_id in discovered_items
 
 func get_save_data() -> Dictionary:
 	return {
@@ -192,7 +206,8 @@ func get_save_data() -> Dictionary:
 		"upgrade_magnet_range": upgrade_magnet_range,
 		"upgrade_grass_quality": upgrade_grass_quality,
 		"upgrade_grass_regen": upgrade_grass_regen,
-		"inventory": inventory
+		"inventory": inventory,
+		"discovered_items": discovered_items
 	}
 
 func load_save_data(data: Dictionary) -> void:
@@ -202,6 +217,7 @@ func load_save_data(data: Dictionary) -> void:
 	upgrade_grass_quality = data.get("upgrade_grass_quality", 0)
 	upgrade_grass_regen = data.get("upgrade_grass_regen", 0)
 	inventory = data.get("inventory", {})
+	discovered_items = data.get("discovered_items", [])
 	money_changed.emit(money)
 	inventory_changed.emit()
 
