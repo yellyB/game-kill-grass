@@ -6,6 +6,12 @@ var target: Node2D = null
 
 @onready var sprite: Sprite2D = $Sprite2D
 
+var is_flying: bool = false
+var fly_time: float = 0.0
+var fly_duration: float = 0.45
+var start_pos: Vector2 = Vector2.ZERO
+var control_point: Vector2 = Vector2.ZERO
+
 func setup(p_item_id: String, p_texture: ImageTexture, p_target: Node2D) -> void:
 	item_id = p_item_id
 	item_texture = p_texture
@@ -16,33 +22,62 @@ func _ready() -> void:
 		sprite.texture = item_texture
 	_animate()
 
+func _process(delta: float) -> void:
+	if not is_flying:
+		return
+
+	fly_time += delta
+	var t = clampf(fly_time / fly_duration, 0.0, 1.0)
+
+	if not is_instance_valid(target):
+		_collect()
+		return
+
+	var eased_t = t * t * t
+	var end_pos = target.global_position
+
+	var inv_t = 1.0 - eased_t
+	global_position = inv_t * inv_t * start_pos + 2 * inv_t * eased_t * control_point + eased_t * eased_t * end_pos
+
+	var s = lerpf(1.8, 0.3, t * t)
+	scale = Vector2(s, s)
+
+	if t > 0.65:
+		modulate.a = lerpf(1.0, 0.5, (t - 0.65) / 0.35)
+
+	if t >= 1.0:
+		is_flying = false
+		_collect()
+
 func _animate() -> void:
 	scale = Vector2.ZERO
 
 	var pop_tween = create_tween()
 	pop_tween.set_ease(Tween.EASE_OUT)
 	pop_tween.set_trans(Tween.TRANS_BACK)
-	pop_tween.tween_property(self, "scale", Vector2(1.2, 1.2), 0.25)
-	pop_tween.tween_property(self, "scale", Vector2.ONE, 0.1)
+	pop_tween.tween_property(self, "scale", Vector2(2.4, 2.4), 0.2)
+	pop_tween.tween_property(self, "scale", Vector2(1.8, 1.8), 0.1)
 	await pop_tween.finished
 
-	await get_tree().create_timer(0.15).timeout
+	await get_tree().create_timer(0.2).timeout
 
 	if not is_instance_valid(target):
 		_collect()
 		return
 
-	var fly_tween = create_tween()
-	fly_tween.set_ease(Tween.EASE_IN)
-	fly_tween.set_trans(Tween.TRANS_QUAD)
+	start_pos = global_position
+	var end_pos = target.global_position
+	var mid = (start_pos + end_pos) * 0.5
+	var direction = end_pos - start_pos
+	var perpendicular = Vector2(-direction.y, direction.x).normalized()
 
-	fly_tween.set_parallel(true)
-	fly_tween.tween_property(self, "global_position", target.global_position, 0.3)
-	fly_tween.tween_property(self, "scale", Vector2(0.5, 0.5), 0.3)
-	fly_tween.tween_property(self, "modulate:a", 0.5, 0.25).set_delay(0.15)
-	await fly_tween.finished
+	var dist = start_pos.distance_to(end_pos)
+	var arc_height = maxf(80.0, dist * 0.5)
+	var side_offset = randf_range(-25, 25)
+	control_point = mid + Vector2(0, -arc_height) + perpendicular * side_offset
 
-	_collect()
+	fly_time = 0.0
+	is_flying = true
 
 func _collect() -> void:
 	GameManager.add_item(item_id)
