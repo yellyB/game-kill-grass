@@ -116,6 +116,7 @@ const FINAL_RECIPE: Dictionary = {
     {"item_id": "이세계 내비게이션", "count": 1},
     {"item_id": "강화 유리 모듈", "count": 6},
     {"item_id": "운전기사", "count": 1},
+    {"item_id": "졸음 약", "count": 1},
   ]
 }
 
@@ -374,22 +375,31 @@ func _create_base_material_slot(item_id: String, image_path: String, count: int)
 
   return slot
 
+func _count_parts_fulfilled() -> int:
+  var count = 0
+  for recipe in RECIPES:
+    var needed = _get_final_recipe_required(recipe.id)
+    if GameManager.get_item_count(recipe.id) >= needed:
+      count += 1
+  return count
+
 func _create_final_assembly_card() -> PanelContainer:
-  var fulfilled = _count_fulfilled_ingredients(FINAL_RECIPE)
-  var total = FINAL_RECIPE.ingredients.size()
+  var parts_fulfilled = _count_parts_fulfilled()
+  var parts_total = RECIPES.size()
+  var all_parts_ready = parts_fulfilled >= parts_total
   var can_craft = _can_craft(FINAL_RECIPE)
-  var is_locked = fulfilled < total
+  var missing_potion = all_parts_ready and not can_craft
 
   var card = PanelContainer.new()
-  card.custom_minimum_size = Vector2(400, 130)
+  card.custom_minimum_size = Vector2(400, 0)
 
   var style = StyleBoxFlat.new()
-  if is_locked:
+  if not all_parts_ready:
     style.bg_color = Color(0.06, 0.06, 0.08)
   elif can_craft:
     style.bg_color = Color(0.2, 0.18, 0.08)
   else:
-    style.bg_color = Color(0.18, 0.12, 0.08)
+    style.bg_color = Color(0.14, 0.1, 0.16)
   style.corner_radius_top_left = 16
   style.corner_radius_top_right = 16
   style.corner_radius_bottom_left = 16
@@ -398,25 +408,34 @@ func _create_final_assembly_card() -> PanelContainer:
   style.border_width_bottom = 3
   style.border_width_left = 3
   style.border_width_right = 3
-  style.border_color = Color(1.0, 0.8, 0.2) if can_craft else Color(0.2, 0.2, 0.25) if is_locked else Color(0.4, 0.3, 0.2)
+  if can_craft:
+    style.border_color = Color(1.0, 0.8, 0.2)
+  elif all_parts_ready:
+    style.border_color = Color(0.5, 0.3, 0.6)
+  else:
+    style.border_color = Color(0.2, 0.2, 0.25)
   style.content_margin_left = 20
   style.content_margin_right = 20
   style.content_margin_top = 16
   style.content_margin_bottom = 16
   card.add_theme_stylebox_override("panel", style)
 
-  if is_locked:
+  if not all_parts_ready:
     card.modulate = Color(1, 1, 1, 0.5)
+
+  var main_vbox = VBoxContainer.new()
+  main_vbox.add_theme_constant_override("separation", 10)
+  card.add_child(main_vbox)
 
   var hbox = HBoxContainer.new()
   hbox.alignment = BoxContainer.ALIGNMENT_CENTER
   hbox.add_theme_constant_override("separation", 16)
-  card.add_child(hbox)
+  main_vbox.add_child(hbox)
 
   var icon_label = Label.new()
-  icon_label.text = "?" if is_locked else FINAL_RECIPE.icon
+  icon_label.text = "?" if not all_parts_ready else FINAL_RECIPE.icon
   icon_label.add_theme_font_size_override("font_size", 56)
-  if is_locked:
+  if not all_parts_ready:
     icon_label.add_theme_color_override("font_color", Color(0.3, 0.3, 0.4))
   hbox.add_child(icon_label)
 
@@ -426,20 +445,24 @@ func _create_final_assembly_card() -> PanelContainer:
   hbox.add_child(info_vbox)
 
   var name_label = Label.new()
-  name_label.text = "???" if is_locked else FINAL_RECIPE.id
+  name_label.text = "???" if not all_parts_ready else FINAL_RECIPE.id
   name_label.add_theme_font_size_override("font_size", 30)
-  name_label.add_theme_color_override("font_color", Color(0.3, 0.3, 0.4) if is_locked else Color(1, 0.9, 0.5))
+  name_label.add_theme_color_override("font_color", Color(0.3, 0.3, 0.4) if not all_parts_ready else Color(1, 0.9, 0.5))
   name_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
   name_label.add_theme_constant_override("outline_size", 2)
   info_vbox.add_child(name_label)
 
   var summary = Label.new()
-  summary.text = "부품을 모두 모으면 해금" if is_locked else "부품 %d/%d" % [fulfilled, total]
+  if not all_parts_ready:
+    summary.text = "부품을 모두 모으면 해금"
+    summary.add_theme_color_override("font_color", Color(0.3, 0.3, 0.35))
+  else:
+    summary.text = "부품 %d/%d" % [parts_fulfilled, parts_total]
+    summary.add_theme_color_override("font_color", Color(0.5, 0.4, 0.3))
   summary.add_theme_font_size_override("font_size", 20)
-  summary.add_theme_color_override("font_color", Color(0.3, 0.3, 0.35) if is_locked else (Color(1.0, 0.8, 0.2) if can_craft else Color(0.5, 0.4, 0.3)))
   info_vbox.add_child(summary)
 
-  if not is_locked:
+  if all_parts_ready:
     var btn = Button.new()
     btn.flat = true
     btn.anchors_preset = Control.PRESET_FULL_RECT
@@ -699,6 +722,17 @@ func _show_recipe_detail(recipe: Dictionary) -> void:
   btn_hbox.add_theme_constant_override("separation", 20)
   vbox.add_child(btn_hbox)
 
+  var is_final = recipe.id == FINAL_RECIPE.id
+  if is_final and not can_craft:
+    var hint = Label.new()
+    hint.text = "한가지 재료가 부족한 것 같다.."
+    hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    hint.add_theme_font_size_override("font_size", 22)
+    hint.add_theme_color_override("font_color", Color(0.7, 0.5, 0.8))
+    hint.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+    hint.add_theme_constant_override("outline_size", 2)
+    vbox.add_child(hint)
+
   var craft_btn = Button.new()
   craft_btn.text = "조합" if can_craft else "재료 부족"
   craft_btn.custom_minimum_size = Vector2(220, 70)
@@ -730,6 +764,9 @@ func _on_craft_pressed(recipe: Dictionary) -> void:
     GameManager.remove_item(ingredient.item_id, ingredient.count)
 
   GameManager.add_item(recipe.id)
+
+  if recipe.id == FINAL_RECIPE.id:
+    GameManager.truck_assembled = true
 
   _crafting = false
 

@@ -1,6 +1,7 @@
 extends Node2D
 
 const MonsterScene = preload("res://scenes/world/monster.tscn")
+const ChestScene = preload("res://scenes/world/chest.tscn")
 
 @export var spawn_count: int = 8
 @export var spawn_radius: float = 800.0
@@ -103,6 +104,8 @@ const WORLD_MONSTER_MAP: Array = [
 	["deer", "dragon"],
 ]
 
+const CHEST_SPAWN_CHANCE: float = 1.0
+
 var player: Node2D = null
 var spawned: bool = false
 
@@ -128,6 +131,8 @@ func spawn_monsters() -> void:
 		monster.position = Vector2(cos(angle), sin(angle)) * dist
 		get_parent().add_child(monster)
 
+	_spawn_chest()
+
 func _pick_random_type() -> Dictionary:
 	var world = GameManager.selected_world
 	var allowed_types: Array = WORLD_MONSTER_MAP[world] if world < WORLD_MONSTER_MAP.size() else ["slime"]
@@ -150,3 +155,32 @@ func _pick_random_type() -> Dictionary:
 		if roll < cumulative:
 			return m
 	return filtered[0]
+
+const LAST_WORLD_CHEST_ITEM: String = "졸음 약"
+
+func _spawn_chest() -> void:
+	var world = GameManager.selected_world
+	var is_last_world = world >= GameManager.WORLD_UNLOCK_COSTS.size() - 1
+
+	if is_last_world:
+		if GameManager.get_item_count(LAST_WORLD_CHEST_ITEM) >= 1:
+			return
+	else:
+		var next_world = world + 1
+		if GameManager.has_key(next_world):
+			return
+		if next_world in GameManager.unlocked_worlds:
+			return
+
+	if randf() > CHEST_SPAWN_CHANCE:
+		return
+
+	var chest = ChestScene.instantiate()
+	if is_last_world:
+		chest.drop_item_id = LAST_WORLD_CHEST_ITEM
+	else:
+		chest.key_world_index = world + 1
+	var angle = randf() * TAU
+	var dist = randf_range(min_distance, spawn_radius)
+	chest.position = Vector2(cos(angle), sin(angle)) * dist
+	get_parent().add_child(chest)
