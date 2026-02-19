@@ -9,8 +9,6 @@ extends CanvasLayer
 @onready var magnet_range_label: Label = $StatsContainer/MagnetRangeLabel
 @onready var grass_quality_label: Label = $StatsContainer/GrassQualityLabel
 
-@onready var debug_container: Control = $DebugContainer
-
 var displayed_money: int = 0
 var target_money: int = 0
 
@@ -25,16 +23,6 @@ func _ready() -> void:
   target_money = GameManager.session_money
   update_money_display()
   update_stats_display()
-
-  if debug_container:
-    debug_container.visible = OS.is_debug_build()
-    if OS.is_debug_build():
-      var reset_btn = debug_container.get_node("ResetBtn")
-      if reset_btn:
-        reset_btn.pressed.connect(_on_reset_btn_pressed)
-      var add_money_btn = debug_container.get_node("AddMoneyBtn")
-      if add_money_btn:
-        add_money_btn.pressed.connect(_on_add_money_btn_pressed)
 
 func _process(delta: float) -> void:
   if displayed_money != target_money:
@@ -92,16 +80,6 @@ func update_stats_display() -> void:
     grass_density_label.text = "풀 밀도: Lv.%d" % (grass_density + 1)
   magnet_range_label.text = "수집 범위: %.0f" % magnet_range
   grass_quality_label.text = "풀 등급: Lv.%d" % (grass_quality + 1)
-
-func _on_reset_btn_pressed() -> void:
-  SaveManager.reset_all_data()
-  displayed_money = 0
-  target_money = 0
-  update_money_display()
-  update_stats_display()
-
-func _on_add_money_btn_pressed() -> void:
-  GameManager.add_money(100000)
 
 const WORLD_NAMES: Array = ["슬라임 늪", "들판", "마법의 숲", "용의 봉우리"]
 
