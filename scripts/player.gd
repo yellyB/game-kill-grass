@@ -3,6 +3,8 @@ extends CharacterBody2D
 signal input_direction_changed(direction: Vector2)
 
 const FloatingTextScene = preload("res://scenes/ui/floating_text.tscn")
+const SFX_GRASS = preload("res://resources/sounds/effect/grass_swoosh.wav")
+const SFX_COIN = preload("res://resources/sounds/effect/pick_coin.wav")
 
 @export var move_speed: float = 300.0
 
@@ -40,8 +42,18 @@ var batch_total: int = 0
 var batch_timer: float = 0.0
 var batch_active: bool = false
 var batch_floating_text: Node2D = null
+var sfx_grass_player: AudioStreamPlayer
+var sfx_coin_player: AudioStreamPlayer
 
 func _ready() -> void:
+  sfx_grass_player = AudioStreamPlayer.new()
+  sfx_grass_player.stream = SFX_GRASS
+  sfx_grass_player.volume_db = -5.0
+  add_child(sfx_grass_player)
+  sfx_coin_player = AudioStreamPlayer.new()
+  sfx_coin_player.stream = SFX_COIN
+  sfx_coin_player.volume_db = -8.0
+  add_child(sfx_coin_player)
   attack_timer.timeout.connect(_on_attack_timer_timeout)
   update_attack_range()
   create_weapon_visual()
@@ -143,6 +155,8 @@ func try_attack() -> void:
   grass_spawner.attack_grass_in_area(local_attack_center, attack_radius)
 
   _attack_monsters_in_area(attack_center, attack_radius)
+
+  sfx_grass_player.play()
 
   var target_pos = attack_center + input_direction * 30
   swing_weapon(target_pos)
@@ -600,6 +614,7 @@ func _input(event: InputEvent) -> void:
         input_direction = drag_vector.normalized()
 
 func accumulate_coin_text(value: int) -> void:
+  sfx_coin_player.play()
   if batch_active and is_instance_valid(batch_floating_text):
     batch_total += value
     batch_timer = BATCH_TIMEOUT

@@ -147,6 +147,7 @@ func open_panel() -> void:
   panel_opened.emit()
 
 func _on_toggle_pressed() -> void:
+  GameManager.play_button_click()
   is_open = !is_open
   panel.visible = is_open
   if is_open:
@@ -157,6 +158,7 @@ func _on_toggle_pressed() -> void:
     panel_closed.emit()
 
 func _on_close_pressed() -> void:
+  GameManager.play_button_click()
   is_open = false
   panel.visible = false
   panel_closed.emit()
@@ -545,6 +547,7 @@ func _create_part_slot(recipe: Dictionary) -> PanelContainer:
   return slot
 
 func _show_recipe_detail(recipe: Dictionary) -> void:
+  GameManager.play_button_click()
   for child in detail_container.get_children():
     child.queue_free()
 
@@ -740,6 +743,7 @@ func _show_recipe_detail(recipe: Dictionary) -> void:
   btn_hbox.add_child(close_btn_detail)
 
 func _close_recipe_detail() -> void:
+  GameManager.play_button_click()
   detail_container.visible = false
   for child in detail_container.get_children():
     child.queue_free()
@@ -747,6 +751,7 @@ func _close_recipe_detail() -> void:
 func _on_craft_pressed(recipe: Dictionary) -> void:
   if not _can_craft(recipe):
     return
+  GameManager.play_craft_sound()
 
   _crafting = true
 
