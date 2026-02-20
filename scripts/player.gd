@@ -1,6 +1,7 @@
 extends CharacterBody2D
 
 signal input_direction_changed(direction: Vector2)
+signal player_hit
 
 const FloatingTextScene = preload("res://scenes/ui/floating_text.tscn")
 const SFX_GRASS = preload("res://resources/sounds/effect/grass_swoosh.wav")
@@ -9,6 +10,14 @@ const SFX_COIN = preload("res://resources/sounds/effect/pick_coin.wav")
 @export var move_speed: float = 300.0
 
 const DEBUG_SHOW_RANGES: bool = true
+
+var is_stunned: bool = false
+var is_invincible: bool = false
+var stun_timer: float = 0.0
+var invincible_timer: float = 0.0
+const STUN_DURATION: float = 2.0
+const INVINCIBLE_DURATION: float = 3.0
+const MONSTER_HIT_RADIUS: float = 45.0
 
 @onready var attack_area: Area2D = $AttackArea
 @onready var attack_shape: CollisionShape2D = $AttackArea/CollisionShape2D
@@ -70,7 +79,25 @@ func find_grass_spawner() -> void:
       grass_spawner = world_root.get_node_or_null("GrassSpawner")
 
 func _process(delta: float) -> void:
+  _check_monster_collision()
+
+  if is_stunned:
+    stun_timer -= delta
+    if stun_timer <= 0:
+      is_stunned = false
+
+  if is_invincible:
+    invincible_timer -= delta
+    player_visual.modulate.a = 0.3 if fmod(invincible_timer, 0.2) < 0.1 else 1.0
+    if invincible_timer <= 0:
+      is_invincible = false
+      player_visual.modulate.a = 1.0
+
   input_direction = get_input_direction()
+
+  if is_stunned:
+    input_direction = Vector2.ZERO
+
   input_direction_changed.emit(input_direction)
 
   if input_direction != Vector2.ZERO:
@@ -143,7 +170,10 @@ func try_attack() -> void:
 
   can_attack = false
   var weapon_speed = WeaponManager.get_weapon_speed()
-  attack_timer.wait_time = 0.2 / weapon_speed
+  var wait = 0.2 / weapon_speed
+  if is_stunned:
+    wait *= 2.0
+  attack_timer.wait_time = wait
   attack_timer.start()
 
   var attack_center = global_position
@@ -637,6 +667,46 @@ func _finish_batch() -> void:
     batch_floating_text.finish_batch()
   batch_floating_text = null
   batch_total = 0
+
+func _check_monster_collision() -> void:
+  if is_invincible:
+    return
+  for monster in get_tree().get_nodes_in_group("monsters"):
+    if not is_instance_valid(monster):
+      continue
+    if global_position.distance_to(monster.global_position) < MONSTER_HIT_RADIUS:
+      _on_monster_hit()
+      return
+
+func _on_monster_hit() -> void:
+  is_stunned = true
+  is_invincible = true
+  stun_timer = STUN_DURATION
+  invincible_timer = INVINCIBLE_DURATION
+  player_hit.emit()
+  _drop_penalty_coins()
+  player_visual.modulate = Color(1, 0.3, 0.3)
+  var tween = create_tween()
+  tween.tween_property(player_visual, "modulate", Color(1, 1, 1, 1), 0.15)
+
+func _drop_penalty_coins() -> void:
+  var penalty = int(GameManager.session_money * 0.05)
+  if penalty <= 0:
+    return
+  GameManager.add_money(-penalty)
+  var penalty_text = FloatingTextScene.instantiate()
+  penalty_text.position = Vector2(0, -70)
+  add_child(penalty_text)
+  penalty_text.setup_penalty(penalty)
+  if not grass_spawner:
+    return
+  var coin_count = mini(penalty, 10)
+  var per_coin = maxi(penalty / coin_count, 1)
+  var world_root = grass_spawner.get_parent()
+  var base_pos = world_root.to_local(global_position)
+  for i in coin_count:
+    var offset = Vector2(randf_range(-60, 60), randf_range(-60, 60))
+    grass_spawner.spawn_coin(base_pos + offset, per_coin)
 
 func _draw() -> void:
   if not DEBUG_SHOW_RANGES:

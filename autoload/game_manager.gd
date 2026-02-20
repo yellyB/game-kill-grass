@@ -170,7 +170,7 @@ func get_random_grass_data() -> GrassData:
     return grass_data_list[2]
 
 func add_money(amount: int) -> void:
-  session_money += amount
+  session_money = max(0, session_money + amount)
   session_money_changed.emit(session_money)
 
 func get_grass_quality_level() -> int:
