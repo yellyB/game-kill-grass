@@ -11,11 +11,11 @@ const SFX_COIN = preload("res://resources/sounds/effect/pick_coin.wav")
 
 const DEBUG_SHOW_RANGES: bool = true
 
-var is_stunned: bool = false
+var is_hit_debuffed: bool = false
 var is_invincible: bool = false
-var stun_timer: float = 0.0
+var hit_debuff_timer: float = 0.0
 var invincible_timer: float = 0.0
-const STUN_DURATION: float = 2.0
+const HIT_DEBUFF_DURATION: float = 1.5
 const INVINCIBLE_DURATION: float = 3.0
 const MONSTER_HIT_RADIUS: float = 45.0
 
@@ -84,10 +84,11 @@ func find_grass_spawner() -> void:
 func _process(delta: float) -> void:
   _check_monster_collision()
 
-  if is_stunned:
-    stun_timer -= delta
-    if stun_timer <= 0:
-      is_stunned = false
+  if is_hit_debuffed:
+    hit_debuff_timer -= delta
+    if hit_debuff_timer <= 0:
+      is_hit_debuffed = false
+      GameManager.hit_penalty_active = false
 
   if is_invincible:
     invincible_timer -= delta
@@ -97,10 +98,6 @@ func _process(delta: float) -> void:
       player_visual.modulate.a = 1.0
 
   input_direction = get_input_direction()
-
-  if is_stunned:
-    input_direction = Vector2.ZERO
-
   input_direction_changed.emit(input_direction)
 
   if input_direction != Vector2.ZERO:
@@ -174,8 +171,6 @@ func try_attack() -> void:
   can_attack = false
   var weapon_speed = WeaponManager.get_weapon_speed() * GameManager.get_session_attack_speed_mult()
   var wait = 0.2 / weapon_speed
-  if is_stunned:
-    wait *= 2.0
   attack_timer.wait_time = wait
   attack_timer.start()
 
@@ -695,10 +690,11 @@ func _check_monster_collision() -> void:
       return
 
 func _on_monster_hit() -> void:
-  is_stunned = true
+  is_hit_debuffed = true
   is_invincible = true
-  stun_timer = STUN_DURATION
+  hit_debuff_timer = HIT_DEBUFF_DURATION
   invincible_timer = INVINCIBLE_DURATION
+  GameManager.hit_penalty_active = true
   player_hit.emit()
   _drop_penalty_coins()
   player_visual.modulate = Color(1, 0.3, 0.3)
@@ -707,6 +703,9 @@ func _on_monster_hit() -> void:
 
 func _drop_penalty_coins() -> void:
   var penalty = int(GameManager.session_money * 0.05)
+  var coin_count = randi_range(7, 10)
+  for i in coin_count:
+    _spawn_scatter_coin()
   if penalty <= 0:
     return
   GameManager.add_money(-penalty)
@@ -714,15 +713,30 @@ func _drop_penalty_coins() -> void:
   penalty_text.position = Vector2(0, -70)
   add_child(penalty_text)
   penalty_text.setup_penalty(penalty)
-  if not grass_spawner:
-    return
-  var coin_count = mini(penalty, 10)
-  var per_coin = maxi(penalty / coin_count, 1)
-  var world_root = grass_spawner.get_parent()
-  var base_pos = world_root.to_local(global_position)
-  for i in coin_count:
-    var offset = Vector2(randf_range(-60, 60), randf_range(-60, 60))
-    grass_spawner.spawn_coin(base_pos + offset, per_coin)
+
+func _spawn_scatter_coin() -> void:
+  var coin = Node2D.new()
+  coin.position = Vector2.ZERO
+  coin.z_index = 10
+  add_child(coin)
+
+  var poly = Polygon2D.new()
+  var points: PackedVector2Array = []
+  for j in 10:
+    var angle = TAU / 10.0 * j
+    points.append(Vector2(cos(angle), sin(angle)) * 12.0)
+  poly.polygon = points
+  poly.color = Color(1.0, 0.85, 0.0)
+  coin.add_child(poly)
+
+  var dir = Vector2(randf_range(-1, 1), randf_range(-1, 1)).normalized()
+  var fly_dist = randf_range(80, 160)
+  var target = coin.position + dir * fly_dist
+
+  var tw = create_tween()
+  tw.tween_property(coin, "position", target, 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+  tw.tween_property(coin, "modulate:a", 0.0, 0.3)
+  tw.tween_callback(coin.queue_free)
 
 func _draw() -> void:
   if not DEBUG_SHOW_RANGES:
