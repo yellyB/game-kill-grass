@@ -316,6 +316,8 @@ func attack_grass_in_area(center: Vector2, radius: float) -> int:
       var is_golden = grass_data[grid_pos].type == 3
       if is_golden or randf() < 0.2:
         spawn_coin(pos, grass_data[grid_pos].value)
+      if randf() < 0.01:
+        spawn_powerup(pos)
 
   return total_value
 
@@ -325,3 +327,12 @@ func spawn_coin(pos: Vector2, value: int) -> void:
   coin.position = pos
   coin.set_value(value)
   get_parent().add_child(coin)
+
+const POWERUP_TYPES: Array = ["attack_speed", "attack_range", "magnet_range"]
+
+func spawn_powerup(pos: Vector2) -> void:
+  var PowerupScene = preload("res://scenes/world/powerup.tscn")
+  var powerup = PowerupScene.instantiate()
+  powerup.position = pos
+  powerup.powerup_type = POWERUP_TYPES[randi() % POWERUP_TYPES.size()]
+  get_parent().add_child(powerup)

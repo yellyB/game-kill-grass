@@ -5,7 +5,6 @@ signal panel_closed
 
 @onready var panel: Panel = $Panel
 @onready var grass_density_btn: Button = $Panel/VBoxContainer/GrassDensityBtn
-@onready var magnet_range_btn: Button = $Panel/VBoxContainer/MagnetRangeBtn
 @onready var grass_quality_btn: Button = $Panel/VBoxContainer/GrassQualityBtn
 @onready var grass_regen_btn: Button = $Panel/VBoxContainer/GrassRegenBtn
 @onready var description_label: Label = $Panel/DescriptionPanel/DescriptionLabel
@@ -24,12 +23,6 @@ const UPGRADE_INFO = {
     "description": "맵에 풀이 더 빽빽하게 자랍니다.",
     "stat_format": "풀 간격: %.1f → %.1f",
     "max_level": 10
-  },
-  "magnet_range": {
-    "name": "수집 범위",
-    "description": "코인이 더 먼 거리에서 자동으로 끌려옵니다.",
-    "stat_format": "수집 범위: %.0f → %.0f",
-    "max_level": -1
   },
   "grass_quality": {
     "name": "풀 등급",
@@ -52,7 +45,6 @@ func _ready() -> void:
   confirm_btn.pressed.connect(_on_confirm_pressed)
 
   grass_density_btn.pressed.connect(_on_grass_density_selected)
-  magnet_range_btn.pressed.connect(_on_magnet_range_selected)
   grass_quality_btn.pressed.connect(_on_grass_quality_selected)
   grass_regen_btn.pressed.connect(_on_grass_regen_selected)
 
@@ -106,10 +98,6 @@ func _on_grass_density_selected() -> void:
   GameManager.play_button_click()
   select_upgrade("grass_density")
 
-func _on_magnet_range_selected() -> void:
-  GameManager.play_button_click()
-  select_upgrade("magnet_range")
-
 func _on_grass_quality_selected() -> void:
   GameManager.play_button_click()
   select_upgrade("grass_quality")
@@ -133,7 +121,6 @@ func clear_selection() -> void:
 
 func update_button_selection() -> void:
   grass_density_btn.modulate = Color(1.0, 1.0, 0.5) if selected_upgrade == "grass_density" else Color(1, 1, 1)
-  magnet_range_btn.modulate = Color(1.0, 1.0, 0.5) if selected_upgrade == "magnet_range" else Color(1, 1, 1)
   grass_quality_btn.modulate = Color(1.0, 1.0, 0.5) if selected_upgrade == "grass_quality" else Color(1, 1, 1)
   grass_regen_btn.modulate = Color(1.0, 1.0, 0.5) if selected_upgrade == "grass_regen" else Color(1, 1, 1)
 
@@ -157,14 +144,6 @@ func update_description() -> void:
       GameManager.upgrade_grass_density += 1
       next_value = GameManager.get_grass_min_spacing()
       GameManager.upgrade_grass_density = temp_level
-    "magnet_range":
-      current_level = GameManager.upgrade_magnet_range
-      cost = GameManager.get_upgrade_cost(current_level)
-      current_value = GameManager.get_magnet_range()
-      var temp_level = GameManager.upgrade_magnet_range
-      GameManager.upgrade_magnet_range += 1
-      next_value = GameManager.get_magnet_range()
-      GameManager.upgrade_magnet_range = temp_level
     "grass_quality":
       current_level = GameManager.upgrade_grass_quality
       cost = GameManager.get_upgrade_cost(current_level)
@@ -205,9 +184,6 @@ func update_confirm_button() -> void:
     "grass_density":
       current_level = GameManager.upgrade_grass_density
       max_level = GameManager.MAX_DENSITY_LEVEL
-      cost = GameManager.get_upgrade_cost(current_level)
-    "magnet_range":
-      current_level = GameManager.upgrade_magnet_range
       cost = GameManager.get_upgrade_cost(current_level)
     "grass_quality":
       current_level = GameManager.upgrade_grass_quality
@@ -276,7 +252,6 @@ func update_button_texts() -> void:
   else:
     grass_density_btn.text = "풀 밀도 Lv.%d → Lv.%d" % [density_level, density_level + 1]
 
-  magnet_range_btn.text = "수집 범위 Lv.%d → Lv.%d" % [GameManager.upgrade_magnet_range, GameManager.upgrade_magnet_range + 1]
   grass_quality_btn.text = "풀 등급 Lv.%d → Lv.%d" % [GameManager.upgrade_grass_quality, GameManager.upgrade_grass_quality + 1]
 
   if regen_level >= GameManager.MAX_REGEN_LEVEL:

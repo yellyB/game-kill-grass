@@ -16,9 +16,12 @@ signal world_unlocked(index: int)
 signal key_acquired(world_index: int)
 
 var upgrade_grass_density: int = 0
-var upgrade_magnet_range: int = 0
 var upgrade_grass_quality: int = 0
 var upgrade_grass_regen: int = 0
+
+var session_buff_attack_speed: int = 0
+var session_buff_attack_range: int = 0
+var session_buff_magnet_range: int = 0
 
 const BASE_UPGRADE_COST: int = 100
 const UPGRADE_COST_MULTIPLIER: float = 1.5
@@ -37,6 +40,7 @@ signal session_money_changed(new_amount: int)
 signal upgrade_purchased(upgrade_type: String, level: int)
 signal item_added(item_id: String, count: int)
 signal inventory_changed()
+signal powerup_acquired(type: String, level: int)
 
 var _sfx_click: AudioStreamPlayer
 var _sfx_confirm: AudioStreamPlayer
@@ -186,7 +190,25 @@ func get_grass_density_level() -> int:
   return upgrade_grass_density
 
 func get_magnet_range() -> float:
-  return base_magnet_range * (1.0 + upgrade_magnet_range * 0.3)
+  return base_magnet_range * (1.0 + session_buff_magnet_range * 0.3)
+
+func get_session_attack_speed_mult() -> float:
+  return 1.0 + session_buff_attack_speed * 0.25
+
+func get_session_attack_range_mult() -> float:
+  return 1.0 + session_buff_attack_range * 0.25
+
+func apply_powerup(type: String) -> void:
+  match type:
+    "attack_speed":
+      session_buff_attack_speed += 1
+      powerup_acquired.emit(type, session_buff_attack_speed)
+    "attack_range":
+      session_buff_attack_range += 1
+      powerup_acquired.emit(type, session_buff_attack_range)
+    "magnet_range":
+      session_buff_magnet_range += 1
+      powerup_acquired.emit(type, session_buff_magnet_range)
 
 func get_grass_regen_time(base_time: float) -> float:
   return base_time - (upgrade_grass_regen * 2.0)
@@ -201,8 +223,6 @@ func purchase_upgrade(upgrade_type: String) -> bool:
     "grass_density":
       current_level = upgrade_grass_density
       max_level = MAX_DENSITY_LEVEL
-    "magnet_range":
-      current_level = upgrade_magnet_range
     "grass_quality":
       current_level = upgrade_grass_quality
     "grass_regen":
@@ -224,8 +244,6 @@ func purchase_upgrade(upgrade_type: String) -> bool:
   match upgrade_type:
     "grass_density":
       upgrade_grass_density += 1
-    "magnet_range":
-      upgrade_magnet_range += 1
     "grass_quality":
       upgrade_grass_quality += 1
     "grass_regen":
@@ -289,7 +307,6 @@ func get_save_data() -> Dictionary:
   return {
     "money": money,
     "upgrade_grass_density": upgrade_grass_density,
-    "upgrade_magnet_range": upgrade_magnet_range,
     "upgrade_grass_quality": upgrade_grass_quality,
     "upgrade_grass_regen": upgrade_grass_regen,
     "inventory": inventory,
@@ -303,7 +320,6 @@ func get_save_data() -> Dictionary:
 func load_save_data(data: Dictionary) -> void:
   money = data.get("money", 0)
   upgrade_grass_density = data.get("upgrade_grass_density", 0)
-  upgrade_magnet_range = data.get("upgrade_magnet_range", 0)
   upgrade_grass_quality = data.get("upgrade_grass_quality", 0)
   upgrade_grass_regen = data.get("upgrade_grass_regen", 0)
   inventory = data.get("inventory", {})
@@ -330,4 +346,7 @@ func finalize_session() -> void:
 
 func reset_session_data() -> void:
   session_money = 0
+  session_buff_attack_speed = 0
+  session_buff_attack_range = 0
+  session_buff_magnet_range = 0
   session_money_changed.emit(0)
