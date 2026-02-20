@@ -70,10 +70,11 @@ func collect() -> void:
 		return
 	is_collected = true
 
-	GameManager.add_money(value)
+	var actual_value = value * GameManager.get_coin_multiplier()
+	GameManager.add_money(actual_value)
 
 	if player and player.has_method("accumulate_coin_text"):
-		player.accumulate_coin_text(value)
+		player.accumulate_coin_text(actual_value)
 
 	if visual:
 		var tween = create_tween()

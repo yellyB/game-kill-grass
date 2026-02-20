@@ -162,7 +162,9 @@ func die() -> void:
 
   await tween2.finished
 
-  _drop_item()
+  var drop_count = 3 if GameManager.is_beast_rush_active() else 1
+  for i in drop_count:
+    _drop_item()
 
   queue_free()
 
