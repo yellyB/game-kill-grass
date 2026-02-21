@@ -18,6 +18,7 @@ signal key_acquired(world_index: int)
 var upgrade_grass_density: int = 0
 var upgrade_grass_quality: int = 0
 var upgrade_grass_regen: int = 0
+var upgrade_grass_reward: int = 0
 
 var session_buff_attack_speed: int = 0
 var session_buff_attack_range: int = 0
@@ -35,8 +36,9 @@ const UPGRADE_COST_MULTIPLIER: float = 1.5
 var base_magnet_range: float = 75.0
 
 const MAX_DENSITY_LEVEL: int = 10
-const MAX_QUALITY_LEVEL: int = 16
+const MAX_QUALITY_LEVEL: int = 10
 const MAX_REGEN_LEVEL: int = 10
+const MAX_REWARD_LEVEL: int = 10
 const BASE_GRASS_PER_CHUNK: int = 8
 const BASE_MIN_SPACING: float = 60.0
 
@@ -177,16 +179,16 @@ func get_random_grass_data() -> GrassData:
     return grass_data_list[3]
 
   var normal_w: float
-  if quality_level >= 13:
+  if quality_level >= 8:
     normal_w = 0.0
   else:
-    normal_w = pow((13.0 - quality_level) / 13.0, 1.8)
+    normal_w = pow((8.0 - quality_level) / 8.0, 1.8)
 
   var strong_w: float
-  if quality_level <= 3:
+  if quality_level <= 2:
     strong_w = 0.0
   else:
-    strong_w = pow((quality_level - 3.0) / 13.0, 1.8)
+    strong_w = pow((quality_level - 2.0) / 8.0, 1.8)
 
   var tough_w = max(0.0, 1.0 - normal_w - strong_w)
 
@@ -206,10 +208,10 @@ func get_grass_quality_level() -> int:
   return upgrade_grass_quality
 
 func get_grass_per_chunk() -> int:
-  return int(BASE_GRASS_PER_CHUNK * (1.0 + upgrade_grass_density * 0.9))
+  return int(BASE_GRASS_PER_CHUNK + upgrade_grass_density * 7.2)
 
 func get_grass_min_spacing() -> float:
-  return BASE_MIN_SPACING / (1.0 + upgrade_grass_density * 0.4)
+  return BASE_MIN_SPACING - upgrade_grass_density * 4.5
 
 func get_grass_density_level() -> int:
   return upgrade_grass_density
@@ -313,7 +315,10 @@ func _apply_double_or_dust() -> void:
     powerup_acquired.emit("double_or_dust", 0)
 
 func get_total_skill_level() -> int:
-  return upgrade_grass_density + upgrade_grass_quality + upgrade_grass_regen
+  return upgrade_grass_density + upgrade_grass_quality + upgrade_grass_regen + upgrade_grass_reward
+
+func get_grass_reward_multiplier() -> float:
+  return 1.0 + upgrade_grass_reward * 0.3
 
 const WEAPON_SKILL_REQUIREMENTS = [0, 0, 1, 2, 4, 6, 9, 12, 15, 18]
 
@@ -341,6 +346,9 @@ func purchase_upgrade(upgrade_type: String) -> bool:
     "grass_regen":
       current_level = upgrade_grass_regen
       max_level = MAX_REGEN_LEVEL
+    "grass_reward":
+      current_level = upgrade_grass_reward
+      max_level = MAX_REWARD_LEVEL
     _:
       return false
 
@@ -361,6 +369,8 @@ func purchase_upgrade(upgrade_type: String) -> bool:
       upgrade_grass_quality += 1
     "grass_regen":
       upgrade_grass_regen += 1
+    "grass_reward":
+      upgrade_grass_reward += 1
 
   upgrade_purchased.emit(upgrade_type, current_level + 1)
   return true
@@ -422,6 +432,7 @@ func get_save_data() -> Dictionary:
     "upgrade_grass_density": upgrade_grass_density,
     "upgrade_grass_quality": upgrade_grass_quality,
     "upgrade_grass_regen": upgrade_grass_regen,
+    "upgrade_grass_reward": upgrade_grass_reward,
     "inventory": inventory,
     "discovered_items": discovered_items,
     "selected_world": selected_world,
@@ -435,6 +446,7 @@ func load_save_data(data: Dictionary) -> void:
   upgrade_grass_density = data.get("upgrade_grass_density", 0)
   upgrade_grass_quality = data.get("upgrade_grass_quality", 0)
   upgrade_grass_regen = data.get("upgrade_grass_regen", 0)
+  upgrade_grass_reward = data.get("upgrade_grass_reward", 0)
   inventory = data.get("inventory", {})
   discovered_items = data.get("discovered_items", [])
   selected_world = data.get("selected_world", 0)
