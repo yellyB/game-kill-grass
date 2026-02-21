@@ -35,6 +35,7 @@ const UPGRADE_COST_MULTIPLIER: float = 1.5
 var base_magnet_range: float = 75.0
 
 const MAX_DENSITY_LEVEL: int = 10
+const MAX_QUALITY_LEVEL: int = 16
 const MAX_REGEN_LEVEL: int = 10
 const BASE_GRASS_PER_CHUNK: int = 8
 const BASE_MIN_SPACING: float = 60.0
@@ -175,24 +176,24 @@ func get_random_grass_data() -> GrassData:
   if roll < GOLDEN_CHANCE:
     return grass_data_list[3]
 
-  var progress = min(quality_level / 27.0, 1.0)
-
-  var normal_chance: float
-  var tough_chance: float
-
-  if progress < 0.5:
-    var t = progress * 2.0
-    normal_chance = 1.0 - t
-    tough_chance = t
+  var normal_w: float
+  if quality_level >= 13:
+    normal_w = 0.0
   else:
-    var t = (progress - 0.5) * 2.0
-    normal_chance = 0.0
-    tough_chance = 1.0 - t
+    normal_w = pow((13.0 - quality_level) / 13.0, 1.8)
+
+  var strong_w: float
+  if quality_level <= 3:
+    strong_w = 0.0
+  else:
+    strong_w = pow((quality_level - 3.0) / 13.0, 1.8)
+
+  var tough_w = max(0.0, 1.0 - normal_w - strong_w)
 
   var remaining_roll = randf()
-  if remaining_roll < normal_chance:
+  if remaining_roll < normal_w:
     return grass_data_list[0]
-  elif remaining_roll < normal_chance + tough_chance:
+  elif remaining_roll < normal_w + tough_w:
     return grass_data_list[1]
   else:
     return grass_data_list[2]
@@ -311,6 +312,16 @@ func _apply_double_or_dust() -> void:
     add_money(-lost)
     powerup_acquired.emit("double_or_dust", 0)
 
+func get_total_skill_level() -> int:
+  return upgrade_grass_density + upgrade_grass_quality + upgrade_grass_regen
+
+const WEAPON_SKILL_REQUIREMENTS = [0, 0, 1, 2, 4, 6, 9, 12, 15, 18]
+
+func get_weapon_skill_requirement(weapon_level: int) -> int:
+  if weapon_level < 0 or weapon_level >= WEAPON_SKILL_REQUIREMENTS.size():
+    return 0
+  return WEAPON_SKILL_REQUIREMENTS[weapon_level]
+
 func get_grass_regen_time(base_time: float) -> float:
   return base_time - (upgrade_grass_regen * 2.0)
 
@@ -326,6 +337,7 @@ func purchase_upgrade(upgrade_type: String) -> bool:
       max_level = MAX_DENSITY_LEVEL
     "grass_quality":
       current_level = upgrade_grass_quality
+      max_level = MAX_QUALITY_LEVEL
     "grass_regen":
       current_level = upgrade_grass_regen
       max_level = MAX_REGEN_LEVEL
