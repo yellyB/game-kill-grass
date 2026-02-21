@@ -1,6 +1,7 @@
 extends Node2D
 
 const DroppedItemScene = preload("res://scenes/world/dropped_item.tscn")
+const PowerupScene = preload("res://scenes/world/powerup.tscn")
 const SFX_SLASH = preload("res://resources/sounds/effect/monster_slash.wav")
 const SFX_DEATH = preload("res://resources/sounds/effect/monster_death.wav")
 
@@ -164,6 +165,11 @@ func die() -> void:
   var drop_count = 3 if GameManager.is_beast_rush_active() else 1
   for i in drop_count:
     _drop_item()
+
+  if randf() < 0.3:
+    var powerup = PowerupScene.instantiate()
+    powerup.position = position
+    get_parent().add_child(powerup)
 
   queue_free()
 
