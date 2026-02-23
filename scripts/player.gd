@@ -577,9 +577,6 @@ func _fx_wind_beam(pos: Vector2, dir: Vector2) -> void:
   tw.tween_callback(glow.queue_free)
 
 func _fx_satellite_laser(pos: Vector2) -> void:
-  var cam = get_viewport().get_camera_2d()
-  if cam and cam.has_method("shake"):
-    cam.shake(0.5)
   var beam = Line2D.new()
   beam.position = pos
   beam.width = 8.0
