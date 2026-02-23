@@ -298,8 +298,9 @@ func update_sparkles(golden_positions: Array) -> void:
       sparkle_mm.set_instance_color(idx, Color(1.0, 1.0, 0.7, 1.0))
       idx += 1
 
-func attack_grass_in_area(center: Vector2, radius: float) -> int:
+func attack_grass_in_area(center: Vector2, radius: float) -> Dictionary:
   var total_value = 0
+  var hit_count = 0
   var attacked_positions: Array = []
   var damage = WeaponManager.get_weapon_damage()
 
@@ -312,6 +313,7 @@ func attack_grass_in_area(center: Vector2, radius: float) -> int:
     var distance = center.distance_to(world_pos)
 
     if distance <= radius:
+      hit_count += 1
       data.health -= damage
       data.hit_timer = 0.1
       if data.health > 0:
@@ -329,7 +331,7 @@ func attack_grass_in_area(center: Vector2, radius: float) -> int:
       if gd.guaranteed_drop or randf() < gd.drop_chance:
         spawn_coin(pos, grass_data[grid_pos].value)
 
-  return total_value
+  return {"value": total_value, "hit": hit_count > 0}
 
 func spawn_coin(pos: Vector2, value: int) -> void:
   var CoinScene = preload("res://scenes/world/coin.tscn")

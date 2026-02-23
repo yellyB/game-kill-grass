@@ -174,11 +174,12 @@ func try_attack() -> void:
 
   var local_attack_center = attack_center - grass_spawner.global_position
 
-  grass_spawner.attack_grass_in_area(local_attack_center, attack_radius)
+  var result = grass_spawner.attack_grass_in_area(local_attack_center, attack_radius)
 
   _attack_monsters_in_area(attack_center, attack_radius)
 
-  sfx_grass_player.play()
+  if result.hit:
+    sfx_grass_player.play()
 
   var target_pos = attack_center + input_direction * 30
   swing_weapon(target_pos)
