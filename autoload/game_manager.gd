@@ -439,8 +439,12 @@ func get_weapon_skill_requirement(weapon_level: int) -> int:
 func get_grass_regen_time(base_time: float) -> float:
   return base_time - (upgrade_grass_regen * 3.0)
 
-func get_upgrade_cost(current_level: int) -> int:
-  return int(BASE_UPGRADE_COST * pow(UPGRADE_COST_MULTIPLIER, current_level))
+func get_upgrade_cost(current_level: int, upgrade_type: String = "") -> int:
+  var base = int(BASE_UPGRADE_COST * pow(UPGRADE_COST_MULTIPLIER, current_level))
+  if upgrade_type == "golden_chance":
+    var multiplier = 5.0 + current_level * 1.25
+    return int(base * multiplier)
+  return base
 
 func purchase_upgrade(upgrade_type: String) -> bool:
   var current_level: int
@@ -478,7 +482,7 @@ func purchase_upgrade(upgrade_type: String) -> bool:
   if not prereq_result.met:
     return false
 
-  var cost = get_upgrade_cost(current_level)
+  var cost = get_upgrade_cost(current_level, upgrade_type)
   if money < cost:
     return false
 
