@@ -39,7 +39,7 @@ var base_magnet_range: float = 75.0
 
 const MAX_DENSITY_LEVEL: int = 10
 const MAX_QUALITY_LEVEL: int = 10
-const MAX_REGEN_LEVEL: int = 5
+const MAX_REGEN_LEVEL: int = 3
 const MAX_REWARD_LEVEL: int = 10
 const MAX_KNOCKBACK_LEVEL: int = 5
 const MAX_DROP_LEVEL: int = 5
@@ -437,7 +437,7 @@ func get_weapon_skill_requirement(weapon_level: int) -> int:
   return WEAPON_SKILL_REQUIREMENTS[weapon_level]
 
 func get_grass_regen_time(base_time: float) -> float:
-  return base_time - (upgrade_grass_regen * 3.0)
+  return base_time - (upgrade_grass_regen * 5.0)
 
 func get_upgrade_cost(current_level: int, upgrade_type: String = "") -> int:
   var base = int(BASE_UPGRADE_COST * pow(UPGRADE_COST_MULTIPLIER, current_level))
