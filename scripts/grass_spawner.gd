@@ -346,7 +346,7 @@ func _on_golden_bloom() -> void:
   if not player:
     return
   var center = player.global_position - global_position
-  var bloom_radius = chunk_size * 0.5
+  var bloom_radius = GameManager.base_magnet_range
   var golden_data = GameManager.grass_data_list[3]
   for grid_pos in grass_data:
     var data = grass_data[grid_pos]
