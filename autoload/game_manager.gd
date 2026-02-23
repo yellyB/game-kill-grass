@@ -19,6 +19,8 @@ var upgrade_grass_density: int = 0
 var upgrade_grass_quality: int = 0
 var upgrade_grass_regen: int = 0
 var upgrade_grass_reward: int = 0
+var upgrade_monster_knockback: int = 0
+var upgrade_grass_drop: int = 0
 
 var session_buff_attack_speed: int = 0
 var session_buff_attack_range: int = 0
@@ -31,7 +33,7 @@ var timed_buffs: Dictionary = {}
 var hit_penalty_active: bool = false
 
 const BASE_UPGRADE_COST: int = 100
-const UPGRADE_COST_MULTIPLIER: float = 1.5
+const UPGRADE_COST_MULTIPLIER: float = 1.8
 
 var base_magnet_range: float = 75.0
 
@@ -39,6 +41,8 @@ const MAX_DENSITY_LEVEL: int = 10
 const MAX_QUALITY_LEVEL: int = 10
 const MAX_REGEN_LEVEL: int = 10
 const MAX_REWARD_LEVEL: int = 10
+const MAX_KNOCKBACK_LEVEL: int = 5
+const MAX_DROP_LEVEL: int = 5
 const BASE_GRASS_PER_CHUNK: int = 8
 const BASE_MIN_SPACING: float = 60.0
 const GRASS_DROP_CHANCE: float = 0.2
@@ -359,8 +363,17 @@ func _apply_double_or_dust() -> void:
     add_money(-lost)
     powerup_acquired.emit("double_or_dust", 0)
 
+const BASE_KNOCKBACK: float = 600.0
+const KNOCKBACK_PER_LEVEL: float = 120.0
+
+func get_monster_knockback_strength() -> float:
+  return BASE_KNOCKBACK + upgrade_monster_knockback * KNOCKBACK_PER_LEVEL
+
+func get_grass_drop_chance() -> float:
+  return GRASS_DROP_CHANCE + upgrade_grass_drop * 0.06
+
 func get_total_skill_level() -> int:
-  return upgrade_grass_density + upgrade_grass_quality + upgrade_grass_regen + upgrade_grass_reward
+  return upgrade_grass_density + upgrade_grass_quality + upgrade_grass_regen + upgrade_grass_reward + upgrade_monster_knockback + upgrade_grass_drop
 
 func get_grass_reward_multiplier() -> float:
   return 1.0 + upgrade_grass_reward * 0.3
@@ -394,6 +407,12 @@ func purchase_upgrade(upgrade_type: String) -> bool:
     "grass_reward":
       current_level = upgrade_grass_reward
       max_level = MAX_REWARD_LEVEL
+    "monster_knockback":
+      current_level = upgrade_monster_knockback
+      max_level = MAX_KNOCKBACK_LEVEL
+    "grass_drop":
+      current_level = upgrade_grass_drop
+      max_level = MAX_DROP_LEVEL
     _:
       return false
 
@@ -416,6 +435,10 @@ func purchase_upgrade(upgrade_type: String) -> bool:
       upgrade_grass_regen += 1
     "grass_reward":
       upgrade_grass_reward += 1
+    "monster_knockback":
+      upgrade_monster_knockback += 1
+    "grass_drop":
+      upgrade_grass_drop += 1
 
   upgrade_purchased.emit(upgrade_type, current_level + 1)
   return true
@@ -478,6 +501,8 @@ func get_save_data() -> Dictionary:
     "upgrade_grass_quality": upgrade_grass_quality,
     "upgrade_grass_regen": upgrade_grass_regen,
     "upgrade_grass_reward": upgrade_grass_reward,
+    "upgrade_monster_knockback": upgrade_monster_knockback,
+    "upgrade_grass_drop": upgrade_grass_drop,
     "inventory": inventory,
     "discovered_items": discovered_items,
     "selected_world": selected_world,
@@ -492,6 +517,8 @@ func load_save_data(data: Dictionary) -> void:
   upgrade_grass_quality = data.get("upgrade_grass_quality", 0)
   upgrade_grass_regen = data.get("upgrade_grass_regen", 0)
   upgrade_grass_reward = data.get("upgrade_grass_reward", 0)
+  upgrade_monster_knockback = data.get("upgrade_monster_knockback", 0)
+  upgrade_grass_drop = data.get("upgrade_grass_drop", 0)
   inventory = data.get("inventory", {})
   discovered_items = data.get("discovered_items", [])
   selected_world = data.get("selected_world", 0)

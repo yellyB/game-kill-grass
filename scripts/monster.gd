@@ -115,7 +115,6 @@ func _pick_new_wander() -> void:
 
 var is_dead: bool = false
 var knockback_velocity: Vector2 = Vector2.ZERO
-const KNOCKBACK_STRENGTH: float = 600.0
 const KNOCKBACK_FRICTION: float = 5.0
 
 func take_damage(amount: int, from_global_pos: Variant = null) -> void:
@@ -125,7 +124,7 @@ func take_damage(amount: int, from_global_pos: Variant = null) -> void:
   sfx_hit.play()
   if from_global_pos is Vector2:
     var knock_dir = (global_position - from_global_pos).normalized()
-    knockback_velocity = knock_dir * KNOCKBACK_STRENGTH
+    knockback_velocity = knock_dir * GameManager.get_monster_knockback_strength()
   sprite.modulate = Color(1, 0.3, 0.3)
   var tween = create_tween()
   tween.tween_property(sprite, "modulate", Color.WHITE, 0.15)
