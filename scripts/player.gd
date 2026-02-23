@@ -100,9 +100,10 @@ func _process(delta: float) -> void:
     update_sprite_direction()
     update_weapon_direction(delta)
     update_walk_animation(delta)
-    try_attack()
   else:
     reset_walk_animation(delta)
+
+  try_attack()
 
   if batch_active:
     batch_timer -= delta
@@ -162,15 +163,18 @@ func try_attack() -> void:
   if not grass_spawner:
     return
 
+  var attack_center = global_position
+  if input_direction != Vector2.ZERO:
+    attack_center += input_direction * (attack_radius * 0.5)
+
+  if not _has_targets_in_range(attack_center, attack_radius):
+    return
+
   can_attack = false
   var weapon_speed = GameManager.get_session_attack_speed_mult()
   var wait = 0.38 / weapon_speed
   attack_timer.wait_time = wait
   attack_timer.start()
-
-  var attack_center = global_position
-  if input_direction != Vector2.ZERO:
-    attack_center += input_direction * (attack_radius * 0.5)
 
   var local_attack_center = attack_center - grass_spawner.global_position
 
@@ -185,6 +189,20 @@ func try_attack() -> void:
   swing_weapon(target_pos)
 
   _spawn_weapon_effect(input_direction)
+
+func _has_targets_in_range(center: Vector2, radius: float) -> bool:
+  for monster in get_tree().get_nodes_in_group("monsters"):
+    if is_instance_valid(monster) and monster.global_position.distance_to(center) <= radius:
+      return true
+  var local_center = center - grass_spawner.global_position
+  for grid_pos in grass_spawner.grass_data:
+    var data = grass_spawner.grass_data[grid_pos]
+    if data.cut:
+      continue
+    var world_pos = Vector2(grid_pos.x, grid_pos.y)
+    if local_center.distance_to(world_pos) <= radius:
+      return true
+  return false
 
 func swing_weapon(target_pos: Vector2) -> void:
   is_swinging = true
