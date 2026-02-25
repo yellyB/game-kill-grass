@@ -65,6 +65,10 @@ func _process(delta: float) -> void:
     session_time_remaining = 0
     end_session()
 
+  if session_time_remaining <= 3.0 and session_time_remaining > 0:
+    var intensity = (3.0 - session_time_remaining) / 3.0 * 0.4
+    camera.shake(intensity)
+
   update_timer_display()
 
 func update_timer_display() -> void:
