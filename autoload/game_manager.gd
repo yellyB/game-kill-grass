@@ -475,7 +475,6 @@ const SKILL_PREREQS = {
   "golden_chance:1": [{"type": "grass_density", "level": 5}],
   "golden_chance:2": [{"type": "grass_density", "level": 7}],
   "golden_chance:3": [{"type": "grass_density", "level": 9}],
-  "golden_chance:4": [{"type": "grass_density", "level": 10}],
   "grass_drop:1": [{"type": "grass_quality", "level": 2}],
   "grass_drop:2": [{"type": "grass_quality", "level": 4}],
   "grass_drop:3": [{"type": "grass_quality", "level": 6}],
