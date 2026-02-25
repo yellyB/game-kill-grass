@@ -1,6 +1,7 @@
 extends CanvasLayer
 
-@onready var money_label: Label = $MoneyContainer/MoneyLabel
+@onready var money_display = $MoneyDisplay
+@onready var money_label: Label = $MoneyDisplay/MoneyLabel
 @onready var item_notif_container: VBoxContainer = $ItemNotifContainer
 
 @onready var weapon_label: Label = $StatsContainer/WeaponLabel
@@ -33,6 +34,10 @@ func _ready() -> void:
   _create_buff_container()
   _setup_monster_arrows()
 
+  money_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5, 1.0))
+  if GameManager.money_changed.is_connected(money_display._on_money_changed):
+    GameManager.money_changed.disconnect(money_display._on_money_changed)
+
   displayed_money = GameManager.session_money
   target_money = GameManager.session_money
   update_money_display()
@@ -56,11 +61,11 @@ func _process(delta: float) -> void:
 func _on_session_money_changed(_new_amount: int) -> void:
   target_money = GameManager.session_money
   var tween = create_tween()
-  tween.tween_property(money_label, "scale", Vector2(1.2, 1.2), 0.05)
-  tween.tween_property(money_label, "scale", Vector2(1.0, 1.0), 0.1)
+  tween.tween_property(money_display, "scale", Vector2(1.2, 1.2), 0.05)
+  tween.tween_property(money_display, "scale", Vector2(1.0, 1.0), 0.1)
 
 func update_money_display() -> void:
-  money_label.text = "$" + format_number(displayed_money)
+  money_label.text = format_number(displayed_money)
 
 func format_number(num: int) -> String:
   var str_num = str(num)
