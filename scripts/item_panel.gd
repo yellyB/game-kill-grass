@@ -133,14 +133,16 @@ func _ready() -> void:
   update_money_display()
   toggle_btn.visible = show_toggle_button
 
-  GameManager.style_button(toggle_btn, Color(0.35, 0.55, 0.85))
-  GameManager.style_button(close_btn, Color(0.45, 0.45, 0.5))
+  GameManager.style_button(toggle_btn, "sub")
+  close_btn.icon = preload("res://resources/images/icon/back.png")
+  close_btn.expand_icon = true
+  GameManager.style_button(close_btn, "muted")
 
   _build_layout()
 
 func set_toggle_button_visible(should_show: bool) -> void:
   show_toggle_button = should_show
-  if toggle_btn:
+  if is_instance_valid(toggle_btn):
     toggle_btn.visible = should_show
 
 func open_panel() -> void:
@@ -837,7 +839,7 @@ func _show_recipe_detail(recipe: Dictionary) -> void:
   craft_btn.disabled = not can_craft
   if can_craft:
     craft_btn.pressed.connect(_on_craft_pressed.bind(recipe))
-  GameManager.style_button(craft_btn, Color(0.3, 0.75, 0.45))
+  GameManager.style_button(craft_btn)
   btn_hbox.add_child(craft_btn)
 
   var close_btn_detail = Button.new()
@@ -845,7 +847,7 @@ func _show_recipe_detail(recipe: Dictionary) -> void:
   close_btn_detail.custom_minimum_size = Vector2(160, 70)
   close_btn_detail.add_theme_font_size_override("font_size", 28)
   close_btn_detail.pressed.connect(_close_recipe_detail)
-  GameManager.style_button(close_btn_detail, Color(0.45, 0.45, 0.5))
+  GameManager.style_button(close_btn_detail, "muted")
   btn_hbox.add_child(close_btn_detail)
 
 func _close_recipe_detail() -> void:
