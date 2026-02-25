@@ -28,9 +28,9 @@ var _skill_connections: Array = []
 var _skill_node_steps: Dictionary = {}
 var _weapon_steps: Array = []
 
-const NODE_SIZE: int = 42
-const NODE_GAP: int = 6
-const COL_HEADER_HEIGHT: float = 50.0
+const NODE_SIZE: int = 52
+const NODE_GAP: int = 24
+const COL_HEADER_HEIGHT: float = 25.0
 
 const COLOR_COMPLETED = Color(0.2, 0.55, 0.3)
 const COLOR_PURCHASABLE = Color(0.85, 0.7, 0.15)
@@ -540,8 +540,10 @@ func build_skill_tree() -> void:
   if container_width <= 0:
     container_width = panel.size.x - 40
 
+  var tree_margin: float = 50.0
+  var usable_width = container_width - tree_margin * 2
   var col_count = _display_columns.size()
-  var col_width = container_width / float(col_count)
+  var col_width = usable_width / float(col_count)
   var step_size = NODE_SIZE + NODE_GAP
 
   var min_weapon_step: float = 0.0
@@ -560,7 +562,7 @@ func build_skill_tree() -> void:
 
   for col_idx in range(col_count):
     var display_col = _display_columns[col_idx]
-    var col_x = col_idx * col_width
+    var col_x = tree_margin + col_idx * col_width
 
     if display_col == "weapon":
       weapon_col_x = col_x
@@ -588,8 +590,8 @@ func build_skill_tree() -> void:
     bg_style.corner_radius_bottom_left = 8
     bg_style.corner_radius_bottom_right = 8
     bg.add_theme_stylebox_override("panel", bg_style)
-    bg.position = Vector2(col_x + 3, col_top_y - 45)
-    bg.size = Vector2(col_width - 6, col_height)
+    bg.position = Vector2(col_x + 1, col_top_y - 45)
+    bg.size = Vector2(col_width - 2, col_height)
     skill_tree_container.add_child(bg)
 
     var name_label = Label.new()
@@ -683,8 +685,8 @@ func _render_weapon_column(col_x: float, col_width: float, step_size: int, tree_
     bg_style.corner_radius_bottom_left = 8
     bg_style.corner_radius_bottom_right = 8
     bg.add_theme_stylebox_override("panel", bg_style)
-    bg.position = Vector2(col_x + 3, min_y)
-    bg.size = Vector2(col_width - 6, max_y - min_y)
+    bg.position = Vector2(col_x + 1, min_y)
+    bg.size = Vector2(col_width - 2, max_y - min_y)
     skill_tree_container.add_child(bg)
 
   var node_y_positions: Array = []
