@@ -64,8 +64,10 @@ func _ready() -> void:
     shadow.texture = textures[0]
     shadow.scale = Vector2(sprite_scale * 0.67, sprite_scale * 0.25)
   const BASE_HIT_RADIUS: float = 42.0
-  hit_shape.shape.radius = BASE_HIT_RADIUS * (sprite_scale / 0.12)
-  hit_radius = hit_shape.shape.radius
+  var shape = CircleShape2D.new()
+  shape.radius = BASE_HIT_RADIUS * (sprite_scale / 0.12)
+  hit_shape.shape = shape
+  hit_radius = shape.radius
   _pick_new_wander()
   if not has_lightning and lightning_effect:
     lightning_effect.set_process(false)
