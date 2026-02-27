@@ -50,7 +50,7 @@ var hit_penalty_active: bool = false
 const BASE_UPGRADE_COST: int = 100
 const UPGRADE_COST_MULTIPLIER: float = 1.8
 
-var base_magnet_range: float = 75.0
+var base_magnet_range: float = 65.0
 
 const BASE_GRASS_PER_CHUNK: int = 8
 const BASE_MIN_SPACING: float = 60.0
