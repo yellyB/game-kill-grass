@@ -8,7 +8,6 @@ signal panel_closed
 @onready var description_label: Label = $Panel/DescriptionPanel/DescriptionLabel
 @onready var confirm_btn: Button = $Panel/ConfirmBtn
 @onready var close_btn: Button = $Panel/CloseBtn
-@onready var toggle_btn: Button = $ToggleBtn
 @onready var money_display = $Panel/MoneyDisplay
 @onready var skill_tree_container: Control = $Panel/SkillTreeScroll/SkillTreeContainer
 
@@ -16,7 +15,6 @@ signal panel_closed
 @onready var weapon_info_vbox: VBoxContainer = $Panel/WeaponSection/WeaponHBox/WeaponInfo
 
 var is_open: bool = false
-var show_toggle_button: bool = true
 
 var selected_type: String = ""
 var selected_level: int = -1
@@ -45,7 +43,6 @@ var _node_positions: Dictionary = {}
 
 func _ready() -> void:
   panel.visible = false
-  toggle_btn.pressed.connect(_on_toggle_pressed)
   close_btn.pressed.connect(_on_close_pressed)
   confirm_btn.pressed.connect(_on_confirm_pressed)
 
@@ -53,7 +50,6 @@ func _ready() -> void:
   GameManager.upgrade_purchased.connect(_on_upgrade_purchased)
   WeaponManager.weapon_changed.connect(_on_weapon_changed)
 
-  GameManager.style_button(toggle_btn, "sub")
   close_btn.icon = preload("res://resources/images/icon/back.png")
   close_btn.expand_icon = true
   GameManager.style_button(close_btn, "muted")
@@ -64,12 +60,8 @@ func _ready() -> void:
   update_total_skill_label()
   build_skill_tree()
   clear_selection()
-  toggle_btn.visible = show_toggle_button
-
-func set_toggle_button_visible(should_show: bool) -> void:
-  show_toggle_button = should_show
-  if is_instance_valid(toggle_btn):
-    toggle_btn.visible = should_show
+func set_toggle_button_visible(_should_show: bool) -> void:
+  pass
 
 func open_panel() -> void:
   if is_open:
@@ -83,20 +75,6 @@ func open_panel() -> void:
   clear_selection()
   panel_opened.emit()
 
-func _on_toggle_pressed() -> void:
-  GameManager.play_button_click()
-  is_open = !is_open
-  panel.visible = is_open
-  if is_open:
-    update_money_display()
-    update_weapon_display()
-    update_total_skill_label()
-    build_skill_tree()
-    clear_selection()
-    panel_opened.emit()
-  else:
-    panel_closed.emit()
-
 func _on_close_pressed() -> void:
   GameManager.play_button_click()
   is_open = false
@@ -104,10 +82,10 @@ func _on_close_pressed() -> void:
   panel_closed.emit()
 
 func _on_other_panel_opened() -> void:
-  toggle_btn.disabled = true
+  pass
 
 func _on_other_panel_closed() -> void:
-  toggle_btn.disabled = false
+  pass
 
 func _on_weapon_changed(_level: int) -> void:
   update_weapon_display()
