@@ -18,6 +18,8 @@ func _ready() -> void:
 
 	player = get_tree().get_first_node_in_group("player")
 
+	update_visual()
+
 	spawn_animation()
 
 	await get_tree().create_timer(pickup_delay).timeout
@@ -94,13 +96,25 @@ func update_visual() -> void:
 		return
 
 	var coin_color: Color
-	if value >= 15:
+	var shine_color: Color
+	if value > 200:
+		coin_color = Color(0.6, 0.85, 1.0)
+		shine_color = Color(0.85, 0.95, 1.0, 0.8)
+	elif value > 100:
 		coin_color = Color(1.0, 0.85, 0.0)
-	elif value >= 5:
-		coin_color = Color(0.75, 0.75, 0.8)
+		shine_color = Color(1.0, 1.0, 0.6, 0.7)
+	elif value > 50:
+		coin_color = Color(0.75, 0.78, 0.85)
+		shine_color = Color(0.9, 0.92, 1.0, 0.6)
 	else:
-		coin_color = Color(0.8, 0.5, 0.2)
+		coin_color = Color(0.85, 0.55, 0.25)
+		shine_color = Color(1.0, 0.75, 0.4, 0.6)
 
-	for child in visual.get_children():
-		if child is Polygon2D:
-			child.color = coin_color
+	var coin_body = visual.get_node_or_null("CoinBody")
+	var coin_shine = visual.get_node_or_null("CoinShine")
+	if coin_body:
+		coin_body.color = coin_color
+		if value > 200:
+			coin_body.polygon = PackedVector2Array([Vector2(0, -13), Vector2(11, 0), Vector2(0, 13), Vector2(-11, 0)])
+	if coin_shine:
+		coin_shine.color = shine_color
