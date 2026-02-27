@@ -1,5 +1,7 @@
 extends Node
 
+const SCREEN_PADDING: float = 40.0
+
 var money: int = 0
 var session_money: int = 0
 
