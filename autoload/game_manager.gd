@@ -22,7 +22,7 @@ signal key_acquired(world_index: int)
 const SKILL_DEFS: Array = [
   {"type": "grass_density", "name": "풀 밀도", "short_name": "밀도", "max_level": 10,
    "description": "맵에 풀이 더 빽빽하게 자랍니다."},
-  {"type": "grass_quality", "name": "풀 등급", "short_name": "등급", "max_level": 8,
+  {"type": "grass_quality", "name": "풀 등급", "short_name": "등급", "max_level": 10,
    "description": "더 높은 등급의 풀이 등장할 확률이 증가합니다."},
   {"type": "grass_regen", "name": "풀 재생", "short_name": "재생", "max_level": 2,
    "description": "베어진 풀이 더 빨리 다시 자랍니다."},
@@ -293,21 +293,24 @@ func _init_grass_data() -> void:
   grass_data_list.append(strong_grass)
   grass_data_list.append(golden_grass)
 
+const QUALITY_EFFECTIVE: Array = [0.0, 0.2, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+
 func get_random_grass_data() -> GrassData:
-  var quality_level = upgrade_levels.get("grass_quality", 0)
+  var raw_level = upgrade_levels.get("grass_quality", 0)
+  var quality_level = QUALITY_EFFECTIVE[clampi(raw_level, 0, QUALITY_EFFECTIVE.size() - 1)]
 
   var roll = randf()
   if roll < get_golden_grass_chance():
     return grass_data_list[3]
 
   var normal_w: float
-  if quality_level >= 7:
+  if quality_level >= 7.0:
     normal_w = 0.0
   else:
     normal_w = pow((7.0 - quality_level) / 7.0, 1.8)
 
   var strong_w: float
-  if quality_level <= 2:
+  if quality_level <= 2.0:
     strong_w = 0.0
   else:
     strong_w = pow((quality_level - 2.0) / 6.0, 1.8)
@@ -329,11 +332,16 @@ func add_money(amount: int) -> void:
 func get_grass_quality_level() -> int:
   return upgrade_levels.get("grass_quality", 0)
 
+const DENSITY_GRASS_BONUS: Array = [0, 2, 5, 10, 16, 23, 31, 40, 50, 61, 72]
+const DENSITY_SPACING_BONUS: Array = [0.0, 1.0, 2.5, 5.0, 8.5, 13.0, 18.0, 24.0, 30.5, 37.5, 45.0]
+
 func get_grass_per_chunk() -> int:
-  return int(BASE_GRASS_PER_CHUNK + upgrade_levels.get("grass_density", 0) * 7.2)
+  var level = clampi(upgrade_levels.get("grass_density", 0), 0, DENSITY_GRASS_BONUS.size() - 1)
+  return BASE_GRASS_PER_CHUNK + DENSITY_GRASS_BONUS[level]
 
 func get_grass_min_spacing() -> float:
-  return BASE_MIN_SPACING - upgrade_levels.get("grass_density", 0) * 4.5
+  var level = clampi(upgrade_levels.get("grass_density", 0), 0, DENSITY_SPACING_BONUS.size() - 1)
+  return BASE_MIN_SPACING - DENSITY_SPACING_BONUS[level]
 
 func get_grass_density_level() -> int:
   return upgrade_levels.get("grass_density", 0)
@@ -466,18 +474,18 @@ const WEAPON_SKILL_REQUIREMENTS = [0, 0, 2, 4, 7, 11, 16, 21, 27, 34]
 const SKILL_PREREQS = {
   "grass_regen:1": [{"type": "grass_density", "level": 2}],
   "grass_regen:2": [{"type": "grass_density", "level": 5}],
-  "grass_reward:1": [{"type": "grass_quality", "level": 2}],
-  "grass_reward:2": [{"type": "grass_quality", "level": 4}],
-  "grass_reward:3": [{"type": "grass_quality", "level": 6}],
-  "grass_reward:4": [{"type": "grass_quality", "level": 8}],
+  "grass_reward:1": [{"type": "grass_quality", "level": 4}],
+  "grass_reward:2": [{"type": "grass_quality", "level": 6}],
+  "grass_reward:3": [{"type": "grass_quality", "level": 8}],
+  "grass_reward:4": [{"type": "grass_quality", "level": 10}],
   "penalty_reduce:1": [{"type": "grass_reward", "level": 2}],
   "golden_chance:1": [{"type": "grass_density", "level": 5}],
   "golden_chance:2": [{"type": "grass_density", "level": 7}],
   "golden_chance:3": [{"type": "grass_density", "level": 9}],
-  "grass_drop:1": [{"type": "grass_quality", "level": 2}],
-  "grass_drop:2": [{"type": "grass_quality", "level": 4}],
-  "grass_drop:3": [{"type": "grass_quality", "level": 6}],
-  "grass_drop:4": [{"type": "grass_quality", "level": 8}],
+  "grass_drop:1": [{"type": "grass_quality", "level": 4}],
+  "grass_drop:2": [{"type": "grass_quality", "level": 6}],
+  "grass_drop:3": [{"type": "grass_quality", "level": 8}],
+  "grass_drop:4": [{"type": "grass_quality", "level": 10}],
 }
 
 func check_skill_prereqs(type: String, level: int) -> Dictionary:
@@ -520,7 +528,14 @@ func get_grass_regen_time(base_time: float) -> float:
   else:
     return 4.0
 
+const DENSITY_COSTS: Array = [15, 60, 150, 400, 900, 2000, 4500, 10000, 22000, 50000]
+const QUALITY_COSTS: Array = [15, 60, 150, 400, 900, 2000, 4500, 10000, 22000, 50000]
+
 func get_upgrade_cost(current_level: int, upgrade_type: String = "") -> int:
+  if upgrade_type == "grass_density" and current_level < DENSITY_COSTS.size():
+    return DENSITY_COSTS[current_level]
+  if upgrade_type == "grass_quality" and current_level < QUALITY_COSTS.size():
+    return QUALITY_COSTS[current_level]
   var base = int(BASE_UPGRADE_COST * pow(UPGRADE_COST_MULTIPLIER, current_level))
   if upgrade_type in ["grass_reward", "grass_drop"]:
     return int(base * (3.0 + current_level * 14.0))
