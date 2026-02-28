@@ -75,7 +75,7 @@ func _ready() -> void:
   body_area.collision_mask = 8
   var body_shape = CollisionShape2D.new()
   var body_circle = CircleShape2D.new()
-  body_circle.radius = GameManager.base_magnet_range
+  body_circle.radius = 40.0
   body_shape.shape = body_circle
   body_area.add_child(body_shape)
   add_child(body_area)
@@ -643,6 +643,9 @@ func _create_circle_polygon(radius: float, segments: int) -> Polygon2D:
   return poly
 
 func _draw() -> void:
+  var body_radius = 40.0
+  draw_arc(Vector2.ZERO, body_radius, 0, TAU, 32, Color(1.0, 1.0, 0.0, 0.5), 2.0)
+
   if not DEBUG_SHOW_RANGES:
     return
 

@@ -36,7 +36,7 @@ var health: int = 1
 var penalty_min: int = 5
 var penalty_max: int = 10
 var hit_radius: float = 15.0
-var sprite_scale: float = 0.12
+var sprite_scale: float = 0.24
 var sfx_hit: AudioStreamPlayer
 
 func setup(config: Dictionary) -> void:
@@ -48,7 +48,7 @@ func setup(config: Dictionary) -> void:
   has_lightning = config.get("has_lightning", false)
   penalty_min = config.get("penalty_min", 5)
   penalty_max = config.get("penalty_max", 10)
-  sprite_scale = config.get("sprite_scale", 0.12)
+  sprite_scale = config.get("sprite_scale", 0.24)
 
 func _ready() -> void:
   add_to_group("monsters")
@@ -65,7 +65,7 @@ func _ready() -> void:
     shadow.scale = Vector2(sprite_scale * 0.67, sprite_scale * 0.25)
   const BASE_HIT_RADIUS: float = 42.0
   var shape = CircleShape2D.new()
-  shape.radius = BASE_HIT_RADIUS * (sprite_scale / 0.12)
+  shape.radius = BASE_HIT_RADIUS * (sprite_scale / 0.24)
   hit_shape.shape = shape
   hit_radius = shape.radius
   _pick_new_wander()
@@ -234,3 +234,6 @@ func _roll_drop() -> Variant:
     if roll < cumulative:
       return drop
   return drop_table[0]
+
+func _draw() -> void:
+  draw_arc(Vector2.ZERO, hit_radius, 0, TAU, 32, Color(1.0, 1.0, 0.0, 0.5), 2.0)
