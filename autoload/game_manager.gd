@@ -461,7 +461,7 @@ func get_total_skill_level() -> int:
 func get_grass_reward_multiplier() -> float:
   return 1.0 + upgrade_levels.get("grass_reward", 0) * 0.4
 
-const WEAPON_SKILL_REQUIREMENTS = [0, 0, 2, 5, 9, 14, 20, 27, 35, 42]
+const WEAPON_SKILL_REQUIREMENTS = [0, 0, 2, 4, 7, 11, 16, 21, 27, 34]
 
 const SKILL_PREREQS = {
   "grass_regen:1": [{"type": "grass_density", "level": 2}],
