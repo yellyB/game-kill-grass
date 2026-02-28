@@ -3,7 +3,7 @@ extends Node2D
 signal grass_cut(position: Vector2, value: int)
 
 @export var chunk_size: float = 400.0
-@export var render_distance: int = 2
+@export var render_distance: int = 3
 
 var multimesh_instance: MultiMeshInstance2D
 var multimesh: MultiMesh
