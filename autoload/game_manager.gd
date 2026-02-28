@@ -339,7 +339,7 @@ func get_grass_density_level() -> int:
   return upgrade_levels.get("grass_density", 0)
 
 func get_magnet_range() -> float:
-  var mult = 1.0 + session_buff_magnet_range * 0.25
+  var mult = 1.0 + session_buff_magnet_range * 0.5
   if timed_buffs.has("harvest_madness"):
     mult *= 2.0
   mult += get_part_count("강화 유리 모듈", 6) * 0.15
