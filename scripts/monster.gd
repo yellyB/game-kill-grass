@@ -193,9 +193,7 @@ func die() -> void:
 
   await tween2.finished
 
-  var drop_count = 3 if GameManager.is_beast_rush_active() else 1
-  for i in drop_count:
-    _drop_item()
+  _drop_item()
 
   if randf() < 0.3:
     var powerup = PowerupScene.instantiate()
