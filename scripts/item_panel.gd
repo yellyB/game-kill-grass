@@ -581,7 +581,7 @@ func _create_part_slot(recipe: Dictionary) -> PanelContainer:
     buff_name.custom_minimum_size = Vector2(90, 0)
     bar_hbox.add_child(buff_name)
 
-    var bar_bg = PanelContainer.new()
+    var bar_bg = Panel.new()
     bar_bg.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     bar_bg.custom_minimum_size = Vector2(0, 21)
     var bg_style = StyleBoxFlat.new()
