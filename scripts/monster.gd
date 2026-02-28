@@ -37,6 +37,7 @@ var penalty_min: int = 5
 var penalty_max: int = 10
 var hit_radius: float = 15.0
 var sprite_scale: float = 0.24
+var hit_radius_scale: float = 1.0
 var sfx_hit: AudioStreamPlayer
 
 func setup(config: Dictionary) -> void:
@@ -49,6 +50,7 @@ func setup(config: Dictionary) -> void:
   penalty_min = config.get("penalty_min", 5)
   penalty_max = config.get("penalty_max", 10)
   sprite_scale = config.get("sprite_scale", 0.24)
+  hit_radius_scale = config.get("hit_radius_scale", 1.0)
 
 func _ready() -> void:
   add_to_group("monsters")
@@ -65,7 +67,7 @@ func _ready() -> void:
     shadow.scale = Vector2(sprite_scale * 0.67, sprite_scale * 0.25)
   const BASE_HIT_RADIUS: float = 42.0
   var shape = CircleShape2D.new()
-  shape.radius = BASE_HIT_RADIUS * (sprite_scale / 0.24)
+  shape.radius = BASE_HIT_RADIUS * (sprite_scale / 0.24) * hit_radius_scale
   hit_shape.shape = shape
   hit_radius = shape.radius
   _pick_new_wander()
