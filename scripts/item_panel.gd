@@ -472,6 +472,7 @@ func _create_final_assembly_card() -> PanelContainer:
     btn.flat = true
     btn.anchors_preset = Control.PRESET_FULL_RECT
     btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+    btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
     btn.pressed.connect(_show_recipe_detail.bind(FINAL_RECIPE))
     card.add_child(btn)
 
@@ -623,6 +624,7 @@ func _create_part_slot(recipe: Dictionary) -> PanelContainer:
     btn.flat = true
     btn.anchors_preset = Control.PRESET_FULL_RECT
     btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+    btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
     btn.pressed.connect(_show_recipe_detail.bind(recipe))
     slot.add_child(btn)
 
