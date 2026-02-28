@@ -472,8 +472,8 @@ func get_grass_reward_multiplier() -> float:
 const WEAPON_SKILL_REQUIREMENTS = [0, 0, 2, 4, 7, 11, 16, 21, 27, 34]
 
 const SKILL_PREREQS = {
-  "grass_regen:1": [{"type": "grass_density", "level": 2}],
-  "grass_regen:2": [{"type": "grass_density", "level": 5}],
+  "grass_regen:1": [{"type": "grass_density", "level": 4}],
+  "grass_regen:2": [{"type": "grass_density", "level": 7}],
   "grass_reward:1": [{"type": "grass_quality", "level": 4}],
   "grass_reward:2": [{"type": "grass_quality", "level": 6}],
   "grass_reward:3": [{"type": "grass_quality", "level": 8}],
