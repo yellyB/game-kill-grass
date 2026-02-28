@@ -364,7 +364,7 @@ func get_session_attack_range_mult() -> float:
   return mult
 
 func get_session_move_speed_mult() -> float:
-  var mult = 1.0 + session_buff_move_speed * 0.25
+  var mult = 1.0 + session_buff_move_speed * 0.5
   mult += get_part_count("개념상 바퀴", 4) * 0.08
   if timed_buffs.has("overdrive"):
     mult *= 0.5
