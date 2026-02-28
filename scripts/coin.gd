@@ -114,6 +114,6 @@ func update_visual() -> void:
 	if coin_body:
 		coin_body.color = coin_color
 		if value > 200:
-			coin_body.polygon = PackedVector2Array([Vector2(0, -13), Vector2(11, 0), Vector2(0, 13), Vector2(-11, 0)])
+			coin_body.polygon = PackedVector2Array([Vector2(-7, -10), Vector2(7, -10), Vector2(12, -3), Vector2(0, 14), Vector2(-12, -3)])
 	if coin_shine:
 		coin_shine.color = shine_color
