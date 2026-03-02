@@ -39,6 +39,7 @@ var hit_radius: float = 15.0
 var sprite_scale: float = 0.24
 var hit_radius_scale: float = 1.0
 var key_world_index: int = -1
+var is_boss_entering: bool = false
 var sfx_hit: AudioStreamPlayer
 
 func setup(config: Dictionary) -> void:
@@ -73,6 +74,9 @@ func _ready() -> void:
   hit_shape.shape = shape
   hit_radius = shape.radius
   _pick_new_wander()
+  if has_lightning and lightning_effect:
+    var lightning_scale = sprite_scale / 0.24
+    lightning_effect.scale = Vector2(lightning_scale, lightning_scale)
   if not has_lightning and lightning_effect:
     lightning_effect.set_process(false)
     lightning_effect.visible = false
@@ -95,6 +99,9 @@ func _load_texture_from_file(res_path: String) -> Texture2D:
   return null
 
 func _process(delta: float) -> void:
+  if is_boss_entering:
+    return
+
   frame_timer += delta
   if frame_timer >= FRAME_DURATION:
     frame_timer = 0.0
@@ -136,8 +143,35 @@ var knockback_velocity: Vector2 = Vector2.ZERO
 const KNOCKBACK_FRICTION: float = 5.0
 const ITEM_DROP_CHANCE: float = 0.7
 
+func play_boss_entrance() -> void:
+  is_boss_entering = true
+  var drop_height = -600.0
+  sprite.position.y = drop_height
+  if shadow:
+    shadow.modulate.a = 0.1
+    shadow.scale = Vector2(sprite_scale * 0.2, sprite_scale * 0.08)
+  hit_area.set_deferred("monitoring", false)
+  hit_area.set_deferred("monitorable", false)
+
+  var tween = create_tween()
+  tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+  tween.set_parallel(true)
+  tween.tween_property(sprite, "position:y", 0.0, 0.6).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+  if shadow:
+    tween.tween_property(shadow, "scale", Vector2(sprite_scale * 0.67, sprite_scale * 0.25), 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+    tween.tween_property(shadow, "modulate:a", 0.3, 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+  await tween.finished
+
+  var camera = get_tree().get_first_node_in_group("camera")
+  if camera and camera.has_method("shake"):
+    camera.shake(0.8)
+
+  hit_area.set_deferred("monitoring", true)
+  hit_area.set_deferred("monitorable", true)
+
 func take_damage(amount: int, from_global_pos: Variant = null) -> void:
-  if is_dead:
+  if is_dead or is_boss_entering:
     return
   health -= amount
   sfx_hit.play()
