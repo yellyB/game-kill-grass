@@ -62,6 +62,7 @@ func reset_all_data() -> void:
 	GameManager.owned_keys = []
 	GameManager.truck_assembled = false
 	GameManager.prologue_seen = false
+	GameManager.world_strength_levels = {}
 	GameManager.money_changed.emit(0)
 	GameManager.inventory_changed.emit()
 	WeaponManager.current_weapon_level = 0
