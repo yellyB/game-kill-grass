@@ -5,7 +5,6 @@ signal panel_closed
 
 @onready var panel: Panel = $Panel
 @onready var padded_area: Control = $Panel/PaddedArea
-@onready var total_skill_label: Label = $Panel/PaddedArea/TotalSkillLabel
 @onready var description_panel: Panel = $Panel/PaddedArea/DescriptionPanel
 @onready var description_label: Label = $Panel/PaddedArea/DescriptionPanel/DescriptionLabel
 @onready var confirm_btn: Button = $Panel/PaddedArea/ConfirmBtn
@@ -67,7 +66,7 @@ func _ready() -> void:
 
   update_money_display()
   update_weapon_display()
-  update_total_skill_label()
+
   build_skill_tree()
   clear_selection()
 func set_toggle_button_visible(_should_show: bool) -> void:
@@ -80,7 +79,7 @@ func open_panel() -> void:
   panel.visible = true
   update_money_display()
   update_weapon_display()
-  update_total_skill_label()
+
   build_skill_tree()
   clear_selection()
   panel_opened.emit()
@@ -849,7 +848,7 @@ func _on_confirm_pressed() -> void:
   if GameManager.purchase_upgrade(selected_type):
     GameManager.play_skill_upgrade_sound()
     SaveManager.save_game()
-    update_total_skill_label()
+  
     build_skill_tree()
     update_weapon_display()
     update_money_display()
@@ -862,7 +861,7 @@ func _on_money_changed(_amount: int) -> void:
     _update_weapon_buy_button()
 
 func _on_upgrade_purchased(_type: String, _level: int) -> void:
-  update_total_skill_label()
+
   build_skill_tree()
   update_weapon_display()
   update_money_display()
@@ -870,8 +869,6 @@ func _on_upgrade_purchased(_type: String, _level: int) -> void:
 func update_money_display() -> void:
   money_display.update_display()
 
-func update_total_skill_label() -> void:
-  total_skill_label.text = "스킬: %d" % GameManager.get_total_skill_level()
 
 func _apply_side_padding() -> void:
   pass
