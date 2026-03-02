@@ -7,7 +7,6 @@ const SFX_DEATH = preload("res://resources/sounds/effect/monster_death.wav")
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var shadow: Sprite2D = $Shadow
-@onready var lightning_effect: Node2D = $LightningEffect
 @onready var hit_area: Area2D = $HitArea
 @onready var hit_shape: CollisionShape2D = $HitArea/CollisionShape2D
 
@@ -15,7 +14,8 @@ static var _texture_cache: Dictionary = {}
 var textures: Array[Texture2D] = []
 
 var sprite_path: String = "res://resources/images/monster/slime/"
-var has_lightning: bool = true
+var effect_scene_path: String = ""
+var effect_node: Node2D = null
 var drop_table: Array = [
   {"item_id": "질긴 슬라임 조각", "image_path": "res://resources/images/items/질긴 슬라임 조각.png", "weight": 30},
   {"item_id": "번개 먹은 배터리 껍질", "image_path": "res://resources/images/items/번개 먹은 배터리 껍질.png", "weight": 70},
@@ -35,9 +35,9 @@ var max_health: int = 1
 var health: int = 1
 var penalty_min: int = 5
 var penalty_max: int = 10
-var hit_radius: float = 15.0
 var sprite_scale: float = 0.24
-var hit_radius_scale: float = 1.0
+var collision_shape_path: String = ""
+var collision_base_scale: float = 0.0
 var key_world_index: int = -1
 var boss_reward: int = 0
 var boss_potion: String = ""
@@ -50,11 +50,12 @@ func setup(config: Dictionary) -> void:
   health = config.max_health
   wander_speed = config.wander_speed
   drop_table = config.drop_table
-  has_lightning = config.get("has_lightning", false)
+  effect_scene_path = config.get("effect_scene", "")
   penalty_min = config.get("penalty_min", 5)
   penalty_max = config.get("penalty_max", 10)
   sprite_scale = config.get("sprite_scale", 0.24)
-  hit_radius_scale = config.get("hit_radius_scale", 1.0)
+  collision_shape_path = config.get("collision_shape", "")
+  collision_base_scale = config.get("collision_base_scale", 0.0)
   key_world_index = config.get("key_world_index", -1)
   boss_reward = config.get("boss_reward", 0)
   boss_potion = config.get("boss_potion", "")
@@ -72,18 +73,20 @@ func _ready() -> void:
   if shadow and not textures.is_empty():
     shadow.texture = textures[0]
     shadow.scale = Vector2(sprite_scale * 0.67, sprite_scale * 0.25)
-  const BASE_HIT_RADIUS: float = 42.0
-  var shape = CircleShape2D.new()
-  shape.radius = BASE_HIT_RADIUS * (sprite_scale / 0.24) * hit_radius_scale
-  hit_shape.shape = shape
-  hit_radius = shape.radius
+  if collision_shape_path != "":
+    var shape_res = load(collision_shape_path)
+    hit_shape.shape = shape_res.duplicate()
+    if collision_base_scale > 0 and abs(sprite_scale - collision_base_scale) > 0.001:
+      var s = sprite_scale / collision_base_scale
+      hit_shape.scale = Vector2(s, s)
   _pick_new_wander()
-  if has_lightning and lightning_effect:
-    var lightning_scale = sprite_scale / 0.24
-    lightning_effect.scale = Vector2(lightning_scale, lightning_scale)
-  if not has_lightning and lightning_effect:
-    lightning_effect.set_process(false)
-    lightning_effect.visible = false
+  if effect_scene_path != "":
+    var scene = load(effect_scene_path)
+    if scene:
+      effect_node = scene.instantiate()
+      var effect_scale = sprite_scale / 0.24
+      effect_node.scale = Vector2(effect_scale, effect_scale)
+      add_child(effect_node)
 
 func _load_textures() -> void:
   if _texture_cache.has(sprite_path):
@@ -185,9 +188,8 @@ func take_damage(amount: int, from_global_pos: Variant = null) -> void:
   sprite.modulate = Color(1, 0.3, 0.3)
   var tween = create_tween()
   tween.tween_property(sprite, "modulate", Color.WHITE, 0.15)
-  if has_lightning and lightning_effect and lightning_effect.has_method("_spawn_bolts"):
-    lightning_effect._spawn_bolts()
-    lightning_effect._spawn_bolts()
+  if effect_node and effect_node.has_method("burst"):
+    effect_node.burst(2)
   if health <= 0:
     die()
 
@@ -203,9 +205,8 @@ func die() -> void:
   sfx.play()
   sfx.finished.connect(sfx.queue_free)
 
-  if has_lightning and lightning_effect:
-    for i in 3:
-      lightning_effect._spawn_bolts()
+  if effect_node and effect_node.has_method("burst"):
+    effect_node.burst(3)
 
   sprite.modulate = Color(1.5, 1.5, 1.5, 1)
 
@@ -228,10 +229,8 @@ func die() -> void:
     shake_tween.tween_property(sprite, "position", offset, 0.035)
     shake_tween.tween_property(sprite, "position", Vector2.ZERO, 0.035)
 
-  if has_lightning and lightning_effect:
-    lightning_effect.set_process(false)
-    lightning_effect.bolts.clear()
-    lightning_effect.queue_redraw()
+  if effect_node and effect_node.has_method("stop"):
+    effect_node.stop()
 
   await tween2.finished
 
@@ -277,6 +276,7 @@ func _drop_boss_reward() -> void:
   ft.position = position
   get_parent().add_child(ft)
   ft.setup(boss_reward)
+  GameManager.boss_key_collected.emit(-1)
 
 func _drop_potion() -> void:
   var player = get_tree().get_first_node_in_group("player")
@@ -284,6 +284,7 @@ func _drop_potion() -> void:
     return
   var item = DroppedItemScene.instantiate()
   item.setup_potion(boss_potion, player)
+  item.ends_session = true
   item.position = position
   get_parent().add_child(item)
 
