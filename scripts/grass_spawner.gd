@@ -23,14 +23,20 @@ var grid_cell_size: float = 115.0
 const WORLD_GRASS_TINTS: Array = [
   {"base": Color(0.3, 0.7, 0.3), "tip": Color(0.2, 0.5, 0.2)},
   {"base": Color(0.82, 0.7, 0.45), "tip": Color(0.72, 0.6, 0.35)},
+  {"base": Color(0.55, 0.6, 0.7), "tip": Color(0.45, 0.5, 0.62)},
   {"base": Color(0.55, 0.68, 0.85), "tip": Color(0.45, 0.58, 0.78)},
+  {"base": Color(0.4, 0.75, 0.8), "tip": Color(0.3, 0.65, 0.72)},
+  {"base": Color(0.6, 0.58, 0.35), "tip": Color(0.5, 0.48, 0.28)},
   {"base": Color(0.75, 0.48, 0.4), "tip": Color(0.6, 0.38, 0.3)},
 ]
 
 const WORLD_GRASS_COLORS: Array = [
   [Color(0.22, 0.5, 0.22), Color(0.32, 0.65, 0.32), Color(0.45, 0.85, 0.45), null],
   [Color(0.8, 0.65, 0.42), Color(0.88, 0.74, 0.5), Color(0.95, 0.82, 0.58), null],
+  [Color(0.45, 0.5, 0.6), Color(0.55, 0.62, 0.72), Color(0.68, 0.74, 0.85), null],
   [Color(0.5, 0.6, 0.8), Color(0.6, 0.72, 0.9), Color(0.72, 0.82, 1.0), null],
+  [Color(0.35, 0.65, 0.7), Color(0.45, 0.75, 0.82), Color(0.58, 0.88, 0.92), null],
+  [Color(0.5, 0.48, 0.3), Color(0.62, 0.58, 0.38), Color(0.75, 0.7, 0.45), null],
   [Color(0.58, 0.38, 0.32), Color(0.75, 0.45, 0.35), Color(0.92, 0.55, 0.42), null],
 ]
 

@@ -72,6 +72,7 @@ const MONSTER_TYPES: Array = [
 		"penalty_min": 400,
 		"penalty_max": 800,
 		"spawn_weight": 10,
+		"hit_radius_scale": 0.7,
 	},
 	{
 		"type": "deer",
@@ -133,18 +134,95 @@ const FURY_BOSS_TYPES: Dictionary = {
 		"penalty_min": 0,
 		"penalty_max": 0,
 		"spawn_weight": 1,
-		"hit_radius_scale": 1.2,
+		"hit_radius_scale": 0.84,
+	},
+	1: {
+		"type": "boar",
+		"sprite_path": "res://resources/images/monster/boar/",
+		"max_health": 60,
+		"wander_speed": 60,
+		"sprite_scale": 0.84,
+		"drop_table": [],
+		"has_lightning": false,
+		"penalty_min": 0,
+		"penalty_max": 0,
+		"spawn_weight": 1,
+	},
+	2: {
+		"type": "knight",
+		"sprite_path": "res://resources/images/monster/knight/",
+		"max_health": 80,
+		"wander_speed": 48,
+		"sprite_scale": 0.84,
+		"drop_table": [],
+		"has_lightning": false,
+		"penalty_min": 0,
+		"penalty_max": 0,
+		"spawn_weight": 1,
+		"hit_radius_scale": 0.85,
+	},
+	3: {
+		"type": "mage",
+		"sprite_path": "res://resources/images/monster/mage/",
+		"max_health": 100,
+		"wander_speed": 54,
+		"sprite_scale": 0.96,
+		"drop_table": [],
+		"has_lightning": false,
+		"penalty_min": 0,
+		"penalty_max": 0,
+		"spawn_weight": 1,
+		"hit_radius_scale": 0.7,
+	},
+	4: {
+		"type": "deer",
+		"sprite_path": "res://resources/images/monster/deer/",
+		"max_health": 150,
+		"wander_speed": 72,
+		"sprite_scale": 0.84,
+		"drop_table": [],
+		"has_lightning": false,
+		"penalty_min": 0,
+		"penalty_max": 0,
+		"spawn_weight": 1,
+	},
+	5: {
+		"type": "golem",
+		"sprite_path": "res://resources/images/monster/golem/",
+		"max_health": 200,
+		"wander_speed": 40,
+		"sprite_scale": 0.96,
+		"drop_table": [],
+		"has_lightning": false,
+		"penalty_min": 0,
+		"penalty_max": 0,
+		"spawn_weight": 1,
+	},
+	6: {
+		"type": "dragon",
+		"sprite_path": "res://resources/images/monster/dragon/",
+		"max_health": 300,
+		"wander_speed": 80,
+		"sprite_scale": 0.96,
+		"drop_table": [],
+		"has_lightning": false,
+		"penalty_min": 0,
+		"penalty_max": 0,
+		"spawn_weight": 1,
 	},
 }
 
 const WORLD_MONSTER_MAP: Array = [
-	["slime"],
-	["boar", "knight"],
-	["mage", "deer"],
-	["golem", "dragon"],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
+	[],
 ]
 
-const CHEST_CHUNK_CHANCE: float = 0.007
+const CHEST_CHUNK_CHANCE: float = 0.1
 var chest_on_field: bool = false
 
 var player: Node2D = null
@@ -195,6 +273,8 @@ func _get_offscreen_position() -> Vector2:
 func _spawn_wave(count: int) -> void:
 	for i in count:
 		var config = _pick_random_type()
+		if config.is_empty():
+			return
 		var monster = MonsterScene.instantiate()
 		monster.setup(config)
 		monster.position = _get_offscreen_position()
@@ -202,14 +282,14 @@ func _spawn_wave(count: int) -> void:
 
 func _pick_random_type() -> Dictionary:
 	var world = GameManager.selected_world
-	var allowed_types: Array = WORLD_MONSTER_MAP[world] if world < WORLD_MONSTER_MAP.size() else ["slime"]
+	var allowed_types: Array = WORLD_MONSTER_MAP[world] if world < WORLD_MONSTER_MAP.size() else []
 
 	var filtered: Array = []
 	for m in MONSTER_TYPES:
 		if m.type in allowed_types:
 			filtered.append(m)
 	if filtered.is_empty():
-		filtered = [MONSTER_TYPES[0]]
+		return {}
 
 	var total_weight: int = 0
 	for m in filtered:
@@ -223,30 +303,12 @@ func _pick_random_type() -> Dictionary:
 			return m
 	return filtered[0]
 
-const LAST_WORLD_CHEST_ITEM: String = "졸음 약"
-
 func _on_new_chunk_entered(chunk_coord: Vector2i) -> void:
 	if chest_on_field:
-		return
-	if not _should_spawn_chest():
 		return
 	if randf() > CHEST_CHUNK_CHANCE:
 		return
 	_spawn_chest_at_chunk(chunk_coord)
-
-func _should_spawn_chest() -> bool:
-	var world = GameManager.selected_world
-	var is_last_world = world >= GameManager.WORLD_UNLOCK_COSTS.size() - 1
-	if is_last_world:
-		if GameManager.get_item_count(LAST_WORLD_CHEST_ITEM) >= 1:
-			return false
-	else:
-		var next_world = world + 1
-		if GameManager.has_key(next_world):
-			return false
-		if next_world in GameManager.unlocked_worlds:
-			return false
-	return true
 
 func _spawn_chest_at_chunk(chunk_coord: Vector2i) -> void:
 	var chunk_size = 400.0
@@ -255,14 +317,7 @@ func _spawn_chest_at_chunk(chunk_coord: Vector2i) -> void:
 	var chunk_origin = Vector2(chunk_coord.x * chunk_size, chunk_coord.y * chunk_size)
 	var pos = chunk_origin + Vector2(randf() * chunk_size, randf() * chunk_size)
 
-	var world = GameManager.selected_world
-	var is_last_world = world >= GameManager.WORLD_UNLOCK_COSTS.size() - 1
-
 	var chest = ChestScene.instantiate()
-	if is_last_world:
-		chest.drop_item_id = LAST_WORLD_CHEST_ITEM
-	else:
-		chest.key_world_index = world + 1
 	chest.position = pos
 	chest.tree_exited.connect(func(): chest_on_field = false)
 	chest_on_field = true
@@ -276,8 +331,27 @@ func _on_fury_boss_requested() -> void:
 	if not FURY_BOSS_TYPES.has(world):
 		return
 	var config = FURY_BOSS_TYPES[world].duplicate()
-	config["key_world_index"] = world + 1
+	if world + 1 < GameManager.WORLD_UNLOCK_COSTS.size():
+		config["key_world_index"] = world + 1
 	var monster = MonsterScene.instantiate()
 	monster.setup(config)
-	monster.position = _get_offscreen_position()
+	var player_local = get_parent().to_local(player.global_position) if player else Vector2.ZERO
+	var viewport_size = get_viewport().get_visible_rect().size
+	var boss_y_offset = -viewport_size.y * 0.3
+	monster.position = player_local + Vector2(0, boss_y_offset)
+	monster.is_boss_entering = true
+	monster.visible = false
 	get_parent().add_child(monster)
+	_play_boss_entrance(monster)
+
+func _play_boss_entrance(monster: Node2D) -> void:
+	get_tree().paused = true
+	monster.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	await get_tree().create_timer(1.0).timeout
+	monster.visible = true
+	monster.play_boss_entrance()
+	await get_tree().create_timer(0.6).timeout
+	await get_tree().create_timer(1.0).timeout
+	monster.is_boss_entering = false
+	monster.process_mode = Node.PROCESS_MODE_INHERIT
+	get_tree().paused = false

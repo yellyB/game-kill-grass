@@ -8,7 +8,10 @@ var background: ColorRect = null
 const WORLD_BG_COLORS: Array = [
 	Color(0.2, 0.4, 0.2, 1),
 	Color(0.4, 0.35, 0.2, 1),
+	Color(0.3, 0.35, 0.45, 1),
 	Color(0.15, 0.18, 0.35, 1),
+	Color(0.15, 0.3, 0.4, 1),
+	Color(0.3, 0.3, 0.2, 1),
 	Color(0.3, 0.18, 0.15, 1),
 ]
 

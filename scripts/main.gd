@@ -5,7 +5,10 @@ const SESSION_TIME: float = 60.0
 const BGM_PATHS: Array = [
   "res://resources/sounds/bgm_world_1.ogg",
   "res://resources/sounds/bgm_world_2.ogg",
+  "res://resources/sounds/bgm_world_2.ogg",
   "res://resources/sounds/bgm_world_3.ogg",
+  "res://resources/sounds/bgm_world_3.ogg",
+  "res://resources/sounds/bgm_world_4.ogg",
   "res://resources/sounds/bgm_world_4.ogg",
 ]
 
@@ -204,7 +207,7 @@ func show_session_end_overlay(earnings: int) -> void:
 
   var key_world = GameManager.session_key_acquired
   if key_world >= 0:
-    var world_names = ["슬라임 늪", "들판", "마법의 숲", "용의 봉우리"]
+    var world_names = ["슬라임 늪", "들판", "기사의 성벽", "마법의 숲", "수정 호수", "고대 유적", "용의 봉우리"]
     var world_name = world_names[key_world] if key_world < world_names.size() else "월드 %d" % key_world
     var key_label = Label.new()
     key_label.text = "+ 열쇠 (%s)" % world_name
