@@ -16,6 +16,17 @@ var truck_assembled: bool = false
 var prologue_seen: bool = false
 const WORLD_UNLOCK_COSTS: Array = [0, 2000, 5000, 10000, 25000, 50000, 80000]
 
+const WORLD_GRASS_HP_MULT: Array = [1.0, 1.3, 1.8, 2.5, 3.5, 5.0, 7.0]
+const WORLD_GRASS_REWARD_MULT: Array = [1.0, 1.5, 3.0, 5.0, 8.0, 14.0, 22.0]
+
+func get_world_grass_hp_mult() -> float:
+  var w = selected_world
+  return WORLD_GRASS_HP_MULT[w] if w < WORLD_GRASS_HP_MULT.size() else 1.0
+
+func get_world_grass_reward_mult() -> float:
+  var w = selected_world
+  return WORLD_GRASS_REWARD_MULT[w] if w < WORLD_GRASS_REWARD_MULT.size() else 1.0
+
 signal world_unlocked(index: int)
 signal key_acquired(world_index: int)
 
