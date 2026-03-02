@@ -18,7 +18,7 @@ var grass_data: Dictionary = {}
 var loaded_chunks: Dictionary = {}
 var visited_chunks: Dictionary = {}
 
-var grid_cell_size: float = 40.0
+var grid_cell_size: float = 115.0
 
 const WORLD_GRASS_TINTS: Array = [
   {"base": Color(0.3, 0.7, 0.3), "tip": Color(0.2, 0.5, 0.2)},
@@ -142,8 +142,7 @@ func _process(delta: float) -> void:
   update_chunks()
   process_regen(delta)
   update_multimesh()
-  if _has_active_hp_bars:
-    queue_redraw()
+  queue_redraw()
 
 func get_chunk_coord(world_pos: Vector2) -> Vector2i:
   return Vector2i(floori(world_pos.x / chunk_size), floori(world_pos.y / chunk_size))
@@ -307,6 +306,7 @@ func update_sparkles(golden_positions: Array) -> void:
 func attack_grass_in_area(center: Vector2, radius: float) -> Dictionary:
   var total_value = 0
   var hit_count = 0
+  var total_max_health = 0
   var attacked_positions: Array = []
   var damage = WeaponManager.get_weapon_damage()
   var max_targets = WeaponManager.get_weapon_max_targets()
@@ -334,6 +334,7 @@ func attack_grass_in_area(center: Vector2, radius: float) -> Dictionary:
       data.cut = true
       data.regen_timer = 0.0
       total_value += data.value
+      total_max_health += GameManager.grass_data_list[data.type].max_health
       attacked_positions.append(Vector2(grid_pos.x, grid_pos.y))
 
   for pos in attacked_positions:
@@ -343,7 +344,7 @@ func attack_grass_in_area(center: Vector2, radius: float) -> Dictionary:
       if gd.guaranteed_drop or randf() < GameManager.get_grass_drop_chance():
         spawn_coin(pos, grass_data[grid_pos].value)
 
-  return {"value": total_value, "hit": hit_count > 0}
+  return {"value": total_value, "hit": hit_count > 0, "fury": total_max_health}
 
 func spawn_coin(pos: Vector2, value: int) -> void:
   var CoinScene = preload("res://scenes/world/coin.tscn")
@@ -389,6 +390,11 @@ func _on_blackhole() -> void:
       coin.is_being_collected = true
 
 func _draw() -> void:
+  for chunk_coord in loaded_chunks:
+    var origin = Vector2(chunk_coord.x * chunk_size, chunk_coord.y * chunk_size)
+    var rect = Rect2(origin, Vector2(chunk_size, chunk_size))
+    draw_rect(rect, Color(1.0, 1.0, 1.0, 0.15), false, 2.0)
+
   if not _has_active_hp_bars:
     return
   var bar_width: float = 60.0

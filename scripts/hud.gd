@@ -4,6 +4,8 @@ extends CanvasLayer
 @onready var money_display = $PaddedArea/MoneyDisplay
 @onready var money_label: Label = $PaddedArea/MoneyDisplay/MoneyLabel
 @onready var item_notif_container: VBoxContainer = $PaddedArea/ItemNotifContainer
+@onready var fury_progress: ProgressBar = $PaddedArea/FuryHBox/FuryProgressBar
+@onready var fury_label: Label = $PaddedArea/FuryHBox/FuryLabel
 
 var displayed_money: int = 0
 var target_money: int = 0
@@ -35,6 +37,9 @@ func _ready() -> void:
   displayed_money = GameManager.session_money
   target_money = GameManager.session_money
   update_money_display()
+
+  _setup_fury_bar()
+  GameManager.fury_changed.connect(_on_fury_changed)
 
   call_deferred("_connect_player_hit")
 
@@ -243,6 +248,26 @@ func _update_perm_buff(type: String, _level: int) -> void:
   if tex:
     icon.texture = tex
   perm_icons_hbox.add_child(icon)
+
+func _setup_fury_bar() -> void:
+  fury_progress.max_value = GameManager.FURY_MAX
+  fury_progress.value = 0.0
+
+  var fill_style = StyleBoxFlat.new()
+  fill_style.bg_color = Color(0.85, 0.2, 0.15)
+  fill_style.set_corner_radius_all(6)
+  fury_progress.add_theme_stylebox_override("fill", fill_style)
+
+  var bg_style = StyleBoxFlat.new()
+  bg_style.bg_color = Color(0.2, 0.2, 0.2, 0.5)
+  bg_style.set_corner_radius_all(6)
+  fury_progress.add_theme_stylebox_override("background", bg_style)
+
+  fury_label.text = "0"
+
+func _on_fury_changed(value: float) -> void:
+  fury_progress.value = value
+  fury_label.text = str(int(value))
 
 func _setup_monster_arrows() -> void:
   arrow_container = Node2D.new()

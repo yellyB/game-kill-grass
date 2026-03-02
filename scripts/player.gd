@@ -203,6 +203,9 @@ func try_attack() -> void:
   var local_attack_center = attack_center - grass_spawner.global_position
   var result = grass_spawner.attack_grass_in_area(local_attack_center, attack_radius)
 
+  if result.fury > 0:
+    GameManager.add_fury(result.fury)
+
   if result.hit:
     sfx_grass_player.play()
 
