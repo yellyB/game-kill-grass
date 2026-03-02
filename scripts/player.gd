@@ -643,11 +643,11 @@ func _create_circle_polygon(radius: float, segments: int) -> Polygon2D:
   return poly
 
 func _draw() -> void:
-  var body_radius = 40.0
-  draw_arc(Vector2.ZERO, body_radius, 0, TAU, 32, Color(1.0, 1.0, 0.0, 0.5), 2.0)
-
   if not DEBUG_SHOW_RANGES:
     return
+
+  var body_radius = 40.0
+  draw_arc(Vector2.ZERO, body_radius, 0, TAU, 32, Color(1.0, 1.0, 0.0, 0.5), 2.0)
 
   var magnet_range = GameManager.get_magnet_range()
   draw_arc(Vector2.ZERO, magnet_range, 0, TAU, 32, Color(0.3, 0.5, 1.0, 0.5), 2.0)
