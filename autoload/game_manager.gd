@@ -52,9 +52,7 @@ const UPGRADE_COST_MULTIPLIER: float = 1.8
 
 var base_magnet_range: float = 65.0
 
-const BASE_GRASS_PER_CHUNK: int = 8
-const BASE_MIN_SPACING: float = 60.0
-const GRASS_DROP_CHANCE: float = 0.3
+const GRASS_DROP_CHANCE: float = 1.0
 
 var grass_data_list: Array[GrassData] = []
 
@@ -331,17 +329,6 @@ func add_money(amount: int) -> void:
 
 func get_grass_quality_level() -> int:
   return upgrade_levels.get("grass_quality", 0)
-
-const DENSITY_GRASS_BONUS: Array = [0, 2, 5, 10, 16, 23, 31, 40, 50, 61, 72]
-const DENSITY_SPACING_BONUS: Array = [0.0, 1.0, 2.5, 5.0, 8.5, 13.0, 18.0, 24.0, 30.5, 37.5, 45.0]
-
-func get_grass_per_chunk() -> int:
-  var level = clampi(upgrade_levels.get("grass_density", 0), 0, DENSITY_GRASS_BONUS.size() - 1)
-  return BASE_GRASS_PER_CHUNK + DENSITY_GRASS_BONUS[level]
-
-func get_grass_min_spacing() -> float:
-  var level = clampi(upgrade_levels.get("grass_density", 0), 0, DENSITY_SPACING_BONUS.size() - 1)
-  return BASE_MIN_SPACING - DENSITY_SPACING_BONUS[level]
 
 func get_grass_density_level() -> int:
   return upgrade_levels.get("grass_density", 0)
