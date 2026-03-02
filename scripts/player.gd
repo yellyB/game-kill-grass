@@ -120,10 +120,6 @@ func _process(delta: float) -> void:
       is_invincible = false
 
   input_direction = get_input_direction()
-  if input_direction != Vector2.ZERO:
-    attack_area.position = input_direction * (attack_radius * 0.5)
-  else:
-    attack_area.position = Vector2.ZERO
   input_direction_changed.emit(input_direction)
 
   if input_direction != Vector2.ZERO:
@@ -192,8 +188,6 @@ func try_attack() -> void:
     return
 
   var attack_center = global_position
-  if input_direction != Vector2.ZERO:
-    attack_center += input_direction * (attack_radius * 0.5)
 
   if not _has_targets_in_range(attack_center, attack_radius):
     return
