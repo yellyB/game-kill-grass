@@ -9,7 +9,7 @@ const SFX_COIN = preload("res://resources/sounds/effect/pick_coin.wav")
 
 @export var move_speed: float = 300.0
 
-const DEBUG_SHOW_RANGES: bool = false
+const DEBUG_SHOW_RANGES: bool = true
 
 var is_hit_debuffed: bool = false
 var is_invincible: bool = false
@@ -194,7 +194,7 @@ func try_attack() -> void:
 
   can_attack = false
   var weapon_speed = GameManager.get_session_attack_speed_mult()
-  var wait = 0.38 / weapon_speed
+  var wait = 0.7 / weapon_speed
   attack_timer.wait_time = wait
   attack_timer.start()
 
@@ -251,7 +251,7 @@ func swing_weapon(target_pos: Vector2) -> void:
   is_swinging = false
 
 func update_attack_range() -> void:
-  const BASE_ATTACK_RANGE: float = 90.0
+  const BASE_ATTACK_RANGE: float = 60.0
   var weapon_range = GameManager.get_session_attack_range_mult()
   attack_radius = BASE_ATTACK_RANGE * weapon_range
   if attack_shape and attack_shape.shape:
@@ -645,7 +645,7 @@ func _draw() -> void:
   draw_arc(Vector2.ZERO, body_radius, 0, TAU, 32, Color(1.0, 1.0, 0.0, 0.5), 2.0)
 
   var magnet_range = GameManager.get_magnet_range()
-  draw_arc(Vector2.ZERO, magnet_range, 0, TAU, 32, Color(0.3, 0.5, 1.0, 0.5), 2.0)
+  draw_arc(Vector2.ZERO, magnet_range, 0, TAU, 32, Color(0.0, 1.0, 1.0, 0.5), 2.0)
 
   var attack_offset = Vector2.ZERO
   if input_direction != Vector2.ZERO:
