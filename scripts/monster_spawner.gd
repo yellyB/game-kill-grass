@@ -251,6 +251,11 @@ var respawn_timer: float = 0.0
 var grass_spawner: Node2D = null
 
 func _ready() -> void:
+	grass_spawner = get_tree().get_first_node_in_group("grass_spawner")
+	if not grass_spawner:
+		grass_spawner = get_parent().get_node_or_null("GrassSpawner")
+	if grass_spawner and grass_spawner.has_signal("new_chunk_entered"):
+		grass_spawner.new_chunk_entered.connect(_on_new_chunk_entered)
 	call_deferred("_find_player_and_spawn")
 	GameManager.beast_rush_requested.connect(_on_beast_rush)
 	GameManager.fury_boss_requested.connect(_on_fury_boss_requested)
@@ -274,12 +279,6 @@ func spawn_monsters() -> void:
 	spawned = true
 
 	_spawn_wave(randi_range(respawn_min, respawn_max))
-
-	grass_spawner = get_tree().get_first_node_in_group("grass_spawner")
-	if not grass_spawner:
-		grass_spawner = get_parent().get_node_or_null("GrassSpawner")
-	if grass_spawner and grass_spawner.has_signal("new_chunk_entered"):
-		grass_spawner.new_chunk_entered.connect(_on_new_chunk_entered)
 
 func _get_offscreen_position() -> Vector2:
 	var viewport_size = get_viewport().get_visible_rect().size
@@ -324,8 +323,6 @@ func _pick_random_type() -> Dictionary:
 	return filtered[0]
 
 func _on_new_chunk_entered(chunk_coord: Vector2i) -> void:
-	if chest_on_field:
-		return
 	if randf() > CHEST_CHUNK_CHANCE:
 		return
 	_spawn_chest_at_chunk(chunk_coord)
@@ -339,8 +336,6 @@ func _spawn_chest_at_chunk(chunk_coord: Vector2i) -> void:
 
 	var chest = ChestScene.instantiate()
 	chest.position = pos
-	chest.tree_exited.connect(func(): chest_on_field = false)
-	chest_on_field = true
 	get_parent().add_child(chest)
 
 func _on_beast_rush() -> void:
