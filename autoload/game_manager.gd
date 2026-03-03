@@ -85,6 +85,8 @@ const SKILL_DEFS: Array = [
 ]
 
 var upgrade_levels: Dictionary = {}
+var upgrade_sub_levels: Dictionary = {}
+const SUB_LEVEL_MAX: int = 5
 
 var session_buff_attack_speed: int = 0
 var session_buff_attack_range: int = 0
@@ -137,6 +139,8 @@ func _ready() -> void:
   for def in SKILL_DEFS:
     if not upgrade_levels.has(def.type):
       upgrade_levels[def.type] = 0
+    if not upgrade_sub_levels.has(def.type):
+      upgrade_sub_levels[def.type] = 0
   _init_grass_data()
   _sfx_click = AudioStreamPlayer.new()
   _sfx_click.stream = preload("res://resources/sounds/effect/button_click.wav")
@@ -552,6 +556,9 @@ func check_skill_prereqs(type: String, level: int) -> Dictionary:
 func get_upgrade_level(type: String) -> int:
   return upgrade_levels.get(type, 0)
 
+func get_upgrade_sub_level(type: String) -> int:
+  return upgrade_sub_levels.get(type, 0)
+
 func get_skill_max_level(type: String) -> int:
   for def in SKILL_DEFS:
     if def.type == type:
@@ -618,7 +625,10 @@ func purchase_upgrade(upgrade_type: String) -> bool:
 
   money -= cost
   money_changed.emit(money)
-  upgrade_levels[upgrade_type] = next_level
+  upgrade_sub_levels[upgrade_type] = upgrade_sub_levels.get(upgrade_type, 0) + 1
+  if upgrade_sub_levels[upgrade_type] >= SUB_LEVEL_MAX:
+    upgrade_levels[upgrade_type] = next_level
+    upgrade_sub_levels[upgrade_type] = 0
   upgrade_purchased.emit(upgrade_type, next_level)
   return true
 
@@ -683,6 +693,7 @@ func get_save_data() -> Dictionary:
   return {
     "money": money,
     "upgrade_levels": upgrade_levels.duplicate(),
+    "upgrade_sub_levels": upgrade_sub_levels.duplicate(),
     "inventory": inventory,
     "discovered_items": discovered_items,
     "selected_world": selected_world,
@@ -701,6 +712,9 @@ func load_save_data(data: Dictionary) -> void:
   else:
     for def in SKILL_DEFS:
       upgrade_levels[def.type] = int(data.get("upgrade_%s" % def.type, 0))
+  var saved_sub = data.get("upgrade_sub_levels", {})
+  for type in saved_sub:
+    upgrade_sub_levels[type] = int(saved_sub[type])
   inventory = data.get("inventory", {})
   discovered_items = data.get("discovered_items", [])
   selected_world = data.get("selected_world", 0)
