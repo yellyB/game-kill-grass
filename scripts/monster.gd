@@ -42,6 +42,7 @@ var collision_rotation: float = 0.0
 var key_world_index: int = -1
 var boss_reward: int = 0
 var boss_potion: String = ""
+var is_fury_boss: bool = false
 var is_boss_entering: bool = false
 var sfx_hit: AudioStreamPlayer
 
@@ -61,6 +62,7 @@ func setup(config: Dictionary) -> void:
   key_world_index = config.get("key_world_index", -1)
   boss_reward = config.get("boss_reward", 0)
   boss_potion = config.get("boss_potion", "")
+  is_fury_boss = config.get("is_fury_boss", false)
 
 func _ready() -> void:
   add_to_group("monsters")
@@ -243,6 +245,8 @@ func die() -> void:
     _drop_potion()
   elif boss_reward > 0:
     _drop_boss_reward()
+  elif is_fury_boss:
+    GameManager.boss_key_collected.emit(-1)
   else:
     _drop_item()
     if randf() < 0.3:
@@ -305,7 +309,8 @@ func _roll_drop() -> Variant:
   var total_weight: int = 0
   for drop in drop_table:
     total_weight += drop.weight
-
+  if total_weight <= 0:
+    return null
   var roll = randi() % total_weight
   var cumulative: int = 0
   for drop in drop_table:

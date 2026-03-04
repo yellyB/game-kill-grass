@@ -155,6 +155,7 @@ func _on_fury_boss_requested() -> void:
   if not FURY_BOSS_TYPES.has(world):
     return
   var config = FURY_BOSS_TYPES[world].duplicate()
+  config["is_fury_boss"] = true
   var is_last = world + 1 >= GameManager.WORLD_UNLOCK_COSTS.size()
   if _is_world_cleared(world):
     var reward = BOSS_CLEAR_REWARDS[world] if world < BOSS_CLEAR_REWARDS.size() else 0
@@ -179,7 +180,7 @@ func _on_fury_boss_requested() -> void:
 func _play_boss_entrance(monster: Node2D) -> void:
   get_tree().paused = true
   monster.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-  await get_tree().create_timer(1.0).timeout
+  await GameManager.fury_gauge_dismissed
   monster.visible = true
   monster.play_boss_entrance()
   await get_tree().create_timer(0.6).timeout
