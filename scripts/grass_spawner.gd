@@ -38,7 +38,7 @@ const WORLD_GRASS_TINTS: Array = [
 ]
 
 const WORLD_GRASS_COLORS: Array = [
-  [Color(0.22, 0.5, 0.22), Color(0.32, 0.65, 0.32), Color(0.45, 0.85, 0.45), Color(0.3, 0.92, 0.6), Color(0.2, 0.85, 0.8), null],
+  [Color(0.25, 0.55, 0.2), Color(0.5, 0.78, 0.25), Color(0.45, 0.85, 0.45), Color(0.3, 0.92, 0.6), Color(0.2, 0.85, 0.8), null],
   [Color(0.8, 0.65, 0.42), Color(0.88, 0.74, 0.5), Color(0.95, 0.82, 0.58), Color(1.0, 0.88, 0.64), Color(1.0, 0.92, 0.72), null],
   [Color(0.45, 0.5, 0.6), Color(0.55, 0.62, 0.72), Color(0.68, 0.74, 0.85), Color(0.78, 0.84, 0.95), Color(0.85, 0.9, 1.0), null],
   [Color(0.5, 0.6, 0.8), Color(0.6, 0.72, 0.9), Color(0.72, 0.82, 1.0), Color(0.82, 0.9, 1.0), Color(0.9, 0.95, 1.0), null],

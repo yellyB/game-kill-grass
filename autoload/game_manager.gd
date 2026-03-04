@@ -78,16 +78,16 @@ const SKILL_DEFS: Array = [
    "description": "코인을 끌어당기는 범위가 넓어집니다.\n범위: 40 → 200 (틱당 +4)\n단계 5 | 최대 Lv.8"},
   {"type": "grass_density", "name": "풀 밀도", "short_name": "밀도", "sub_max": 10, "max_level": 10,
    "description": "맵에 풀이 더 빽빽하게 자랍니다.\n청크당 풀: 1 → 200 (지수 곡선)\n단계 10 | 최대 Lv.10"},
-  {"type": "grass_quality", "name": "풀 등급", "short_name": "등급", "sub_max": 8, "max_level": 4,
-   "description": "더 높은 등급의 풀이 등장합니다.\n틱마다 다음 등급 확률 증가 (8틱 완료 = 다음 등급 100%)\n단계 8 | 최대 Lv.4"},
+  {"type": "grass_quality", "name": "풀 등급", "short_name": "등급", "sub_max": 8, "max_level": 8,
+   "description": "더 높은 등급의 풀이 등장합니다.\n홀수 레벨: 다음 등급 50%까지\n짝수 레벨: 다음 등급 100%까지\n단계 8 | 최대 Lv.8"},
   {"type": "chest_chance", "name": "상자 확률", "short_name": "상자", "sub_max": 5, "max_level": 5,
    "description": "상자가 등장할 확률이 증가합니다.\n확률: 0% → 5% (틱당 +0.2%)\n단계 5 | 최대 Lv.5"},
   {"type": "crit_chance", "name": "치명타 확률", "short_name": "치확", "sub_max": 5, "max_level": 8,
    "description": "풀을 벨 때 치명타가 발생할 확률이 증가합니다.\n확률: 0% → 80% (틱당 +2%)\n단계 5 | 최대 Lv.8"},
   {"type": "crit_damage", "name": "치명타 피해", "short_name": "치피", "sub_max": 10, "max_level": 9,
    "description": "치명타 발생 시 추가 피해가 증가합니다.\n배율: 120% → 300% (틱당 +2%)\n단계 10 | 최대 Lv.9"},
-  {"type": "weapon", "name": "무기", "short_name": "무기", "sub_max": 5, "max_level": 10,
-   "description": "더 강력한 무기로 교체합니다.\n레벨당 공격력 +1, 완료 시 외형 변경\n단계 5 | 최대 Lv.10"},
+  {"type": "attack_power", "name": "공격력", "short_name": "공격력", "sub_max": 5, "max_level": 9,
+   "description": "풀을 베는 공격력이 증가합니다.\n틱당 공격력 +1\n단계 5 | 최대 Lv.9"},
   {"type": "monster_damage", "name": "몬스터 피해", "short_name": "몬피", "sub_max": 5, "max_level": 7,
    "description": "몬스터에게 주는 피해가 증가합니다.\n배율: 100% → 450% (틱당 +10%) (미정)\n단계 5 | 최대 Lv.7"},
   {"type": "fury_rate", "name": "분노 속도", "short_name": "분노", "sub_max": 4, "max_level": 4,
@@ -98,22 +98,24 @@ const SKILL_DEFS: Array = [
    "description": "황금풀에서 떨어지는 코인이 증가합니다.\n보상: 100원 → ~1,696원 (단계별 10~14% 복리)\n단계 5 | 최대 Lv.5"},
   {"type": "move_speed", "name": "이동 속도", "short_name": "이속", "sub_max": 6, "max_level": 5,
    "description": "플레이어의 이동 속도가 빨라집니다.\n속도: 300 → 600 (틱당 +10)\n단계 6 | 최대 Lv.5"},
+  {"type": "session_time", "name": "세션 시간", "short_name": "시간", "sub_max": 3, "max_level": 5,
+   "description": "세션 시간이 증가합니다.\n+3초\n단계 3 | 최대 Lv.5"},
 ]
 
 const SKILL_GROUPS: Array = [
   {
-    "name": "수확",
-    "skills": ["grass_density", "grass_quality", "golden_chance", "golden_reward"],
+    "name": "무기",
+    "skills": ["attack_power", "attack_speed", "attack_range", "crit_chance", "monster_damage", "crit_damage"],
     "columns": 2,
   },
   {
-    "name": "무기",
-    "skills": ["attack_speed", "attack_range", "crit_chance", "attack_count", "crit_damage", "monster_damage"],
+    "name": "수확",
+    "skills": ["grass_density", "grass_quality", "magnet_range", "golden_chance", "attack_count", "golden_reward"],
     "columns": 2,
   },
   {
     "name": "탐험",
-    "skills": ["move_speed", "magnet_range", "chest_chance", "fury_rate"],
+    "skills": ["move_speed", "session_time", "chest_chance", "fury_rate"],
     "columns": 2,
   },
 ]
@@ -132,9 +134,6 @@ var session_buff_move_speed: int = 0
 var timed_buffs: Dictionary = {}
 
 var hit_penalty_active: bool = false
-
-const BASE_UPGRADE_COST: int = 100
-const UPGRADE_COST_MULTIPLIER: float = 1.8
 
 var base_magnet_range: float = 40.0
 
@@ -177,8 +176,7 @@ func _ready() -> void:
       upgrade_levels[def.type] = 0
     if not upgrade_sub_levels.has(def.type):
       upgrade_sub_levels[def.type] = 0
-  upgrade_levels["weapon"] = WeaponManager.current_weapon_level
-  WeaponManager.weapon_changed.connect(func(lvl: int): upgrade_levels["weapon"] = lvl)
+  WeaponManager.current_weapon_level = upgrade_levels.get("attack_power", 0)
   _init_grass_data()
   _sfx_click = AudioStreamPlayer.new()
   _sfx_click.stream = preload("res://resources/sounds/effect/button_click.wav")
@@ -355,7 +353,7 @@ func _init_grass_data() -> void:
 
   var g1 = GrassData.new()
   g1.grass_name = "잔디"
-  g1.max_health = 12
+  g1.max_health = 18
   g1.regen_time = 23.0
   g1.min_drop_value = 5
   g1.max_drop_value = 5
@@ -365,7 +363,7 @@ func _init_grass_data() -> void:
 
   var g2 = GrassData.new()
   g2.grass_name = "여린풀"
-  g2.max_health = 24
+  g2.max_health = 38
   g2.regen_time = 24.0
   g2.min_drop_value = 30
   g2.max_drop_value = 30
@@ -375,7 +373,7 @@ func _init_grass_data() -> void:
 
   var g3 = GrassData.new()
   g3.grass_name = "강한풀"
-  g3.max_health = 48
+  g3.max_health = 75
   g3.regen_time = 25.0
   g3.min_drop_value = 80
   g3.max_drop_value = 80
@@ -385,7 +383,7 @@ func _init_grass_data() -> void:
 
   var g4 = GrassData.new()
   g4.grass_name = "초강풀"
-  g4.max_health = 96
+  g4.max_health = 130
   g4.regen_time = 26.0
   g4.min_drop_value = 200
   g4.max_drop_value = 200
@@ -418,15 +416,25 @@ func get_random_grass_data() -> GrassData:
 
   var level = upgrade_levels.get("grass_quality", 0)
   var sub = upgrade_sub_levels.get("grass_quality", 0)
-  var current_type = mini(level, 4)
 
-  if current_type >= 4:
+  var base_type = mini(level / 2, 4)
+
+  if level >= 8:
     return grass_data_list[4]
 
-  var transition = float(sub) / 7.0
-  if randf() < transition:
-    return grass_data_list[current_type + 1]
-  return grass_data_list[current_type]
+  var is_first_half = (level % 2 == 0)
+  var half_transition = float(sub) / 7.0 * 0.5
+
+  if is_first_half:
+    var next_chance = half_transition
+    if randf() < next_chance:
+      return grass_data_list[mini(base_type + 1, 4)]
+    return grass_data_list[base_type]
+  else:
+    var next_chance = 0.5 + half_transition
+    if randf() < next_chance:
+      return grass_data_list[mini(base_type + 1, 4)]
+    return grass_data_list[base_type]
 
 func add_fury(amount: float) -> void:
   fury = minf(fury + amount * get_fury_rate_mult(), FURY_MAX)
@@ -557,6 +565,9 @@ func get_session_move_speed_mult() -> float:
     mult *= 0.5
   return mult
 
+func get_session_time_bonus() -> float:
+  return get_skill_total_progress("session_time") * 3.0
+
 func get_coin_multiplier() -> int:
   if timed_buffs.has("gold_rush"):
     return 2
@@ -632,7 +643,7 @@ func get_grass_drop_chance() -> float:
 func get_total_skill_level() -> int:
   var total = 0
   for type in upgrade_levels:
-    if type == "weapon":
+    if type == "attack_power":
       continue
     total += upgrade_levels[type]
   return total
@@ -643,28 +654,28 @@ func get_grass_reward_multiplier() -> float:
 const WEAPON_SKILL_REQUIREMENTS = [0, 0, 2, 4, 7, 11, 16, 21, 27, 34]
 
 const SKILL_PREREQS = {
-  "attack_range:1": [{"type": "attack_speed", "level": 1}],
+  "attack_speed:1": [{"type": "attack_power", "level": 1}],
+  "attack_range:1": [{"type": "attack_power", "level": 1}],
   "crit_chance:1": [{"type": "attack_speed", "level": 1}],
-  "attack_count:1": [{"type": "attack_range", "level": 1}],
+  "monster_damage:1": [{"type": "attack_range", "level": 1}],
   "crit_damage:1": [{"type": "crit_chance", "level": 1}],
-  "monster_damage:1": [{"type": "crit_damage", "level": 1}],
   "grass_quality:1": [{"type": "grass_density", "level": 1}],
-  "golden_chance:1": [{"type": "grass_density", "level": 1}],
+  "magnet_range:1": [{"type": "grass_density", "level": 1}],
+  "golden_chance:1": [{"type": "grass_quality", "level": 1}],
+  "attack_count:1": [{"type": "magnet_range", "level": 1}],
   "golden_reward:1": [{"type": "golden_chance", "level": 1}],
-  "magnet_range:1": [{"type": "move_speed", "level": 1}],
+  "session_time:1": [{"type": "move_speed", "level": 1}],
   "chest_chance:1": [{"type": "move_speed", "level": 1}],
-  "fury_rate:1": [{"type": "magnet_range_or_chest_chance", "level": 1}],
+  "fury_rate:1": [{"type": "session_time_or_chest_chance", "level": 1}],
 }
 
 const SKILL_REQUIRED_TOTAL = {
-  "attack_range": 3, "attack_count": 3,
-  "crit_chance": 3, "crit_damage": 3,
-  "monster_damage": 3,
-  "grass_quality": 3, "golden_chance": 3,
-  "golden_reward": 3,
-  "move_speed": 3, "chest_chance": 3,
-  "fury_rate": 3,
-  "attack_range:2": 10,
+  "attack_count:2": 3,
+  "crit_damage:2": 3,
+  "monster_damage:2": 3,
+  "golden_reward:2": 3,
+  "move_speed:2": 2,
+  "fury_rate:2": 3,
 }
 
 func check_skill_prereqs(type: String, level: int) -> Dictionary:
@@ -732,38 +743,111 @@ func get_grass_regen_time(base_time: float) -> float:
   else:
     return 4.0
 
-const DENSITY_COSTS: Array = [15, 60, 150, 400, 900, 2000, 4500, 10000, 22000, 50000]
-const QUALITY_COSTS: Array = [15, 60, 150, 400, 900, 2000, 4500, 10000, 22000, 50000]
+const ROOT_TICK_COSTS: Array = [
+  [1, 1],
+  [25, 4],
+  [100, 10],
+  [200, 15],
+  [350, 25],
+  [600, 40],
+  [1000, 65],
+  [1600, 100],
+  [2600, 160],
+]
+const DENSITY_TICK_COSTS: Array = [
+  [0, 0],
+  [18, 2],
+  [100, 10],
+  [180, 12],
+  [300, 18],
+  [500, 28],
+  [850, 42],
+  [1400, 65],
+  [2300, 100],
+  [3800, 150],
+]
+const QUALITY_COSTS: Array = [15, 35, 60, 100, 150, 250, 400, 650]
+const ROW2_TICK_COSTS: Array = [
+  [15, 2],
+  [40, 5],
+  [80, 8],
+  [150, 12],
+  [280, 20],
+  [500, 35],
+  [850, 55],
+  [1400, 85],
+  [2200, 130],
+  [3500, 200],
+  [5500, 300],
+  [8500, 450],
+]
+const ROW3_TICK_COSTS: Array = [
+  [50, 6],
+  [120, 10],
+  [220, 18],
+  [400, 30],
+  [700, 50],
+  [1200, 80],
+  [2000, 120],
+  [3300, 190],
+]
+const GOLDEN_CHANCE_TICK_COSTS: Array = [
+  [50, 20],
+  [150, 30],
+  [400, 60],
+  [900, 120],
+  [2000, 250],
+]
+const ROW4_TICK_COSTS: Array = [
+  [50, 5],
+  [100, 8],
+  [180, 14],
+  [320, 22],
+  [550, 35],
+  [950, 55],
+  [1600, 85],
+  [2700, 130],
+  [4500, 200],
+]
+const TIER_ROOT: Array = ["attack_power", "move_speed"]
+const TIER_DENSITY: Array = ["grass_density"]
+const TIER_ROW2: Array = ["attack_speed", "attack_range", "magnet_range", "session_time", "chest_chance"]
+const TIER_ROW3: Array = ["crit_chance", "monster_damage", "attack_count", "fury_rate"]
 
 func get_upgrade_cost(current_level: int, upgrade_type: String = "") -> int:
-  if upgrade_type == "weapon":
-    var next = WeaponManager.get_next_weapon()
-    if next.is_empty():
-      return 0
-    return next.price
-  if upgrade_type == "grass_density" and current_level < DENSITY_COSTS.size():
-    return DENSITY_COSTS[current_level]
-  if upgrade_type == "grass_quality" and current_level < QUALITY_COSTS.size():
-    return QUALITY_COSTS[current_level]
-  var base = int(BASE_UPGRADE_COST * pow(UPGRADE_COST_MULTIPLIER, current_level))
+  var sub = upgrade_sub_levels.get(upgrade_type, 0)
+
+  if current_level == 0 and upgrade_type == "grass_density":
+    return sub / 2 + 1
+
+  if upgrade_type == "grass_quality":
+    if current_level == 0:
+      return 15 + sub
+    if current_level < QUALITY_COSTS.size():
+      return QUALITY_COSTS[current_level]
+    return QUALITY_COSTS[-1]
+
+  var tier_costs: Array
   if upgrade_type == "golden_chance":
-    return int(base * (30.0 + current_level * 65.0))
-  if current_level > 0:
-    return int(base * (1.0 + current_level * 0.4))
-  return base
+    tier_costs = GOLDEN_CHANCE_TICK_COSTS
+  elif upgrade_type in TIER_DENSITY:
+    tier_costs = DENSITY_TICK_COSTS
+  elif upgrade_type in TIER_ROOT:
+    tier_costs = ROOT_TICK_COSTS
+  elif upgrade_type in TIER_ROW2:
+    tier_costs = ROW2_TICK_COSTS
+  elif upgrade_type in TIER_ROW3:
+    tier_costs = ROW3_TICK_COSTS
+  else:
+    tier_costs = ROW4_TICK_COSTS
+
+  if current_level < tier_costs.size():
+    return tier_costs[current_level][0] + sub * tier_costs[current_level][1]
+  var last = tier_costs[-1]
+  var extra = current_level - tier_costs.size() + 1
+  return int((last[0] + sub * last[1]) * pow(1.6, extra))
 
 func purchase_upgrade(upgrade_type: String) -> bool:
-  if upgrade_type == "weapon":
-    var wep_next = upgrade_levels.get("weapon", 0) + 1
-    var wep_prereq = check_skill_prereqs("weapon", wep_next)
-    if not wep_prereq.met:
-      return false
-    if not WeaponManager.purchase_next_weapon():
-      return false
-    upgrade_levels["weapon"] = WeaponManager.current_weapon_level
-    upgrade_purchased.emit(upgrade_type, upgrade_levels["weapon"])
-    return true
-
   var current_level = upgrade_levels.get(upgrade_type, -1)
   if current_level < 0:
     return false
@@ -786,6 +870,9 @@ func purchase_upgrade(upgrade_type: String) -> bool:
   if upgrade_sub_levels[upgrade_type] >= get_skill_sub_max(upgrade_type):
     upgrade_levels[upgrade_type] = next_level
     upgrade_sub_levels[upgrade_type] = 0
+    if upgrade_type == "attack_power":
+      WeaponManager.current_weapon_level = next_level
+      WeaponManager.weapon_changed.emit(next_level)
   upgrade_purchased.emit(upgrade_type, next_level)
   return true
 
@@ -893,6 +980,8 @@ func load_save_data(data: Dictionary) -> void:
     world_strength_levels[int(k)] = int(saved_strength[k])
   money_changed.emit(money)
   inventory_changed.emit()
+  WeaponManager.current_weapon_level = upgrade_levels.get("attack_power", 0)
+  WeaponManager.weapon_changed.emit(WeaponManager.current_weapon_level)
 
 func finalize_session() -> void:
   money += session_money
