@@ -398,7 +398,7 @@ func _init_grass_data() -> void:
 
   var g5 = GrassData.new()
   g5.grass_name = "황금풀"
-  g5.max_health = 160
+  g5.max_health = 80
   g5.regen_time = 25.0
   g5.min_drop_value = 100
   g5.max_drop_value = 100
@@ -686,9 +686,12 @@ const SKILL_PREREQS = {
 const SKILL_REQUIRED_TOTAL = {
   "attack_count:2": 3,
   "crit_damage:2": 3,
+  "monster_damage:1": 20,
   "monster_damage:2": 3,
   "golden_reward:2": 3,
   "move_speed:2": 2,
+  "chest_chance:1": 12,
+  "fury_rate:1": 30,
   "fury_rate:2": 3,
 }
 
@@ -759,19 +762,19 @@ func get_grass_regen_time(base_time: float) -> float:
 
 const ROOT_TICK_COSTS: Array = [
   [1, 1],
-  [25, 4],
-  [100, 10],
-  [200, 15],
-  [350, 25],
-  [600, 40],
-  [1000, 65],
-  [1600, 100],
-  [2600, 160],
+  [12, 3],
+  [300, 20],
+  [80, 8],
+  [150, 12],
+  [280, 18],
+  [500, 28],
+  [850, 42],
+  [1400, 65],
 ]
 const DENSITY_TICK_COSTS: Array = [
   [0, 0],
-  [18, 2],
-  [100, 10],
+  [15, 2],
+  [300, 20],
   [180, 12],
   [300, 18],
   [500, 28],
@@ -806,7 +809,7 @@ const ROW3_TICK_COSTS: Array = [
   [3300, 190],
 ]
 const GOLDEN_CHANCE_TICK_COSTS: Array = [
-  [50, 20],
+  [20, 2],
   [150, 30],
   [400, 60],
   [900, 120],
@@ -837,9 +840,39 @@ func get_upgrade_cost(current_level: int, upgrade_type: String = "") -> int:
   if upgrade_type == "grass_quality":
     if current_level == 0:
       return 15 + sub
+    if current_level == 1:
+      return 20 + sub
+    if current_level == 2:
+      return 80 + sub * 5
     if current_level < QUALITY_COSTS.size():
       return QUALITY_COSTS[current_level]
     return QUALITY_COSTS[-1]
+
+  if upgrade_type == "move_speed" and current_level == 1:
+    return 10 + sub
+
+  if upgrade_type == "attack_range":
+    if current_level == 0:
+      return 10 + sub
+    if current_level == 1:
+      return 25 + sub * 2
+    if current_level == 2:
+      return 60 + sub * 3
+
+  if upgrade_type == "attack_speed" and current_level == 2:
+    return 120 + sub * 10
+
+  if upgrade_type == "crit_chance" and current_level == 0:
+    return 20 + sub * 2
+
+  if upgrade_type == "attack_count" and current_level == 1:
+    return 200 + sub * 20
+
+  if upgrade_type == "session_time":
+    if current_level == 0:
+      return 20 + sub * 5
+    if current_level == 1:
+      return 200 + sub * 30
 
   var tier_costs: Array
   if upgrade_type == "golden_chance":
