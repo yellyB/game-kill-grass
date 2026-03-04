@@ -1283,6 +1283,7 @@ func _on_confirm_pressed() -> void:
   var prev_sub = GameManager.get_upgrade_sub_level(selected_type)
   if GameManager.purchase_upgrade(selected_type):
     GameManager.play_skill_upgrade_sound()
+    Input.vibrate_handheld(50)
     SaveManager.save_game()
 
     var cur_sub = GameManager.get_upgrade_sub_level(selected_type)
