@@ -32,7 +32,7 @@ const NODE_MARGIN: float = 6.0
 const NODE_INNER_PAD: float = 12.0
 const NODE_CORNER_RADIUS: int = 8
 const GROUP_GAP: float = 34.0
-const GROUP_HEADER_H: float = 32.0
+const GROUP_HEADER_H: float = 65.0
 const PLACEHOLDER_ICON = preload("res://resources/images/skill/skill_temp.png")
 const SKILL_ICONS = {
   "attack_power": preload("res://resources/images/skill/attack_power.png"),
@@ -104,7 +104,17 @@ func _ready() -> void:
 
   GameManager.money_changed.connect(_on_money_changed)
   GameManager.upgrade_purchased.connect(_on_upgrade_purchased)
-  WeaponManager.weapon_changed.connect(_on_weapon_changed)
+
+  weapon_section.visible = false
+  var title_label = padded_area.get_node_or_null("TitleLabel")
+  if title_label:
+    title_label.visible = false
+
+  section_label.add_theme_font_size_override("font_size", 40)
+  section_label.offset_top = 160.0
+  section_label.offset_bottom = 205.0
+
+  skill_tree_scroll.offset_top = 295.0
 
   close_btn.icon = preload("res://resources/images/icon/go_back.png")
   close_btn.expand_icon = true
@@ -115,7 +125,6 @@ func _ready() -> void:
   _apply_side_padding()
 
   update_money_display()
-  update_weapon_display()
 
   build_skill_tree()
   clear_selection()
@@ -128,7 +137,6 @@ func open_panel() -> void:
   is_open = true
   panel.visible = true
   update_money_display()
-  update_weapon_display()
 
   build_skill_tree()
   clear_selection()
@@ -433,7 +441,7 @@ func build_skill_tree() -> void:
 
     var header = Label.new()
     header.text = group_name
-    header.add_theme_font_size_override("font_size", 22)
+    header.add_theme_font_size_override("font_size", 32)
     header.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
     header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     header.position = Vector2(group_x, 0)
@@ -756,6 +764,25 @@ func _create_skill_node(skill_type: String, state: String, node_size: float, gro
     sub_label.offset_right = -6
     sub_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
     bar.add_child(sub_label)
+
+  var border_overlay = Panel.new()
+  var bo_style = StyleBoxFlat.new()
+  bo_style.bg_color = Color(0, 0, 0, 0)
+  bo_style.corner_radius_top_left = NODE_CORNER_RADIUS
+  bo_style.corner_radius_top_right = NODE_CORNER_RADIUS
+  bo_style.corner_radius_bottom_left = NODE_CORNER_RADIUS
+  bo_style.corner_radius_bottom_right = NODE_CORNER_RADIUS
+  bo_style.border_width_top = style.border_width_top
+  bo_style.border_width_bottom = style.border_width_bottom
+  bo_style.border_width_left = style.border_width_left
+  bo_style.border_width_right = style.border_width_right
+  bo_style.border_color = style.border_color
+  border_overlay.add_theme_stylebox_override("panel", bo_style)
+  border_overlay.anchors_preset = Control.PRESET_FULL_RECT
+  border_overlay.anchor_right = 1.0
+  border_overlay.anchor_bottom = 1.0
+  border_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+  btn.add_child(border_overlay)
 
   return btn
 
@@ -1193,13 +1220,11 @@ func _on_confirm_pressed() -> void:
     if cur_sub == 0:
       build_skill_tree()
       clear_selection()
-      update_weapon_display()
       update_money_display()
       return
 
     build_skill_tree()
     _reselect_current()
-    update_weapon_display()
     update_money_display()
     update_description()
     update_confirm_button()
@@ -1208,12 +1233,10 @@ func _on_money_changed(_amount: int) -> void:
   update_money_display()
   if is_open:
     update_confirm_button()
-    _update_weapon_buy_button()
 
 func _on_upgrade_purchased(_type: String, _level: int) -> void:
   build_skill_tree()
   _reselect_current()
-  update_weapon_display()
   update_money_display()
 
 func update_money_display() -> void:
