@@ -731,6 +731,27 @@ func _create_skill_node(skill_type: String, state: String, node_size: float, gro
     lock_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
     btn.add_child(lock_rect)
 
+    var prereq = GameManager.check_skill_prereqs(skill_type, next_level)
+    for req in prereq.missing:
+      if req.type == "_total":
+        var req_label = Label.new()
+        req_label.text = "스킬 필요(%d/%d)" % [req.current, req.level]
+        req_label.add_theme_font_size_override("font_size", 20)
+        req_label.add_theme_color_override("font_color", Color(0.6, 0.55, 0.55))
+        req_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+        req_label.add_theme_constant_override("outline_size", 4)
+        req_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        req_label.anchor_left = 0
+        req_label.anchor_top = 0
+        req_label.anchor_right = 1.0
+        req_label.anchor_bottom = 0
+        req_label.offset_top = cy + lock_icon_size / 2.0
+        req_label.offset_left = -10
+        req_label.offset_right = 10
+        req_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        btn.add_child(req_label)
+        break
+
   var label_color = Color(0.5, 0.5, 0.55) if not is_active else Color.WHITE
 
   if is_locked:
@@ -955,9 +976,9 @@ func _get_skill_stat_data(type: String) -> Dictionary:
       label = "공격범위"
       var cv = int(60.0 + ticks * 4.0)
       var nv = int(60.0 + next_ticks * 4.0)
-      cur = "%d" % cv
-      nxt = "%d" % nv
-      delta = "+%d" % (nv - cv)
+      cur = "%dpx" % cv
+      nxt = "%dpx" % nv
+      delta = "+%dpx" % (nv - cv)
     "attack_count":
       label = "공격횟수"
       _restore_tick(type, saved_level, saved_sub)
@@ -973,18 +994,18 @@ func _get_skill_stat_data(type: String) -> Dictionary:
       label = "수집범위"
       var cv = int(40.0 + ticks * 4.0)
       var nv = int(40.0 + next_ticks * 4.0)
-      cur = "%d" % cv
-      nxt = "%d" % nv
-      delta = "+%d" % (nv - cv)
+      cur = "%dpx" % cv
+      nxt = "%dpx" % nv
+      delta = "+%dpx" % (nv - cv)
     "grass_density":
       label = "풀 밀도"
       var nv = GameManager.get_grass_density_value()
       _restore_tick(type, saved_level, saved_sub)
       var cv = GameManager.get_grass_density_value()
       _simulate_next_tick(type)
-      cur = "%d" % cv
-      nxt = "%d" % nv
-      delta = "+%d" % (nv - cv)
+      cur = "%d개" % cv
+      nxt = "%d개" % nv
+      delta = "+%d개" % (nv - cv)
     "grass_quality":
       label = "풀 등급"
       cur = _quality_stat_str(saved_level, saved_sub)
@@ -1015,8 +1036,8 @@ func _get_skill_stat_data(type: String) -> Dictionary:
       delta = "+%.0f" % (nv - cv)
     "crit_damage":
       label = "치명타피해"
-      var cv = 120.0 + ticks * 2.0
-      var nv = 120.0 + next_ticks * 2.0
+      var cv = 120.0 + ticks * 6.0
+      var nv = 120.0 + next_ticks * 6.0
       cur = "%.0f%%" % cv
       nxt = "%.0f%%" % nv
       delta = "+%.0f" % (nv - cv)
@@ -1056,9 +1077,9 @@ func _get_skill_stat_data(type: String) -> Dictionary:
       label = "이동속도"
       var cv = 300.0 + ticks * 10.0
       var nv = 300.0 + next_ticks * 10.0
-      cur = "%.0f" % cv
-      nxt = "%.0f" % nv
-      delta = "+%.0f" % (nv - cv)
+      cur = "%.0fpx/s" % cv
+      nxt = "%.0fpx/s" % nv
+      delta = "+%.0fpx/s" % (nv - cv)
     "attack_power":
       label = "공격력"
       var cv = 1 + ticks
