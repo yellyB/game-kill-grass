@@ -919,10 +919,10 @@ func _quality_stat_str(level: int, sub: int) -> String:
     return "%s 100%%" % GameManager.GRASS_TYPE_NAMES[4]
   var name_next = GameManager.GRASS_TYPE_NAMES[mini(base_type + 1, 4)]
   if is_even:
-    var pct = int(float(sub) / 7.0 * 50)
+    var pct = int(float(sub) / 8.0 * 50)
     return "%s %d%%" % [name_next, pct]
   else:
-    var pct = mini(50 + int(float(sub) / 7.0 * 50), 100)
+    var pct = mini(50 + int(float(sub) / 8.0 * 50), 100)
     return "%s %d%%" % [name_next, pct]
 
 func _get_skill_stat_data(type: String) -> Dictionary:
@@ -993,7 +993,11 @@ func _get_skill_stat_data(type: String) -> Dictionary:
         _simulate_next_tick(type)
       var nl = GameManager.upgrade_levels.get(type, 0)
       var ns = GameManager.upgrade_sub_levels.get(type, 0)
-      nxt = _quality_stat_str(nl, ns)
+      if nl > saved_level and nl % 2 == 0:
+        var completed_name = GameManager.GRASS_TYPE_NAMES[mini(saved_level / 2 + 1, 4)]
+        nxt = "%s 100%%" % completed_name
+      else:
+        nxt = _quality_stat_str(nl, ns)
       delta = ""
     "chest_chance":
       label = "상자확률"

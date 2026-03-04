@@ -414,7 +414,7 @@ func get_random_grass_data() -> GrassData:
     return grass_data_list[4]
 
   var is_first_half = (level % 2 == 0)
-  var half_transition = float(sub) / 7.0 * 0.5
+  var half_transition = float(sub) / 8.0 * 0.5
 
   if is_first_half:
     var next_chance = half_transition
