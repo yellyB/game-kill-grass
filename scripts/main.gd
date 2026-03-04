@@ -1,6 +1,6 @@
 extends Node2D
 
-const SESSION_TIME: float = 60.0
+const SESSION_TIME: float = 45.0
 
 const BGM_PATHS: Array = [
   "res://resources/sounds/bgm_world_1.ogg",
@@ -27,7 +27,7 @@ const BGM_PATHS: Array = [
 @onready var timer_label: Label = $HUD/PaddedArea/TimerHBox/TimerLabel
 @onready var timer_progress: ProgressBar = $HUD/PaddedArea/TimerHBox/TimerProgressBar
 
-var session_time_remaining: float = SESSION_TIME
+var session_time_remaining: float = SESSION_TIME + GameManager.get_session_time_bonus()
 var session_ended: bool = false
 var session_ready: bool = false
 var bgm_player: AudioStreamPlayer
@@ -90,7 +90,8 @@ func update_timer_display() -> void:
   var seconds = int(ceil(session_time_remaining))
   timer_label.text = str(seconds)
 
-  timer_progress.value = clampf((session_time_remaining / SESSION_TIME) * 100.0, 0.0, 100.0)
+  var total_time = SESSION_TIME + GameManager.get_session_time_bonus()
+  timer_progress.value = clampf((session_time_remaining / total_time) * 100.0, 0.0, 100.0)
 
   if seconds <= 10:
     timer_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
