@@ -135,17 +135,6 @@ func _on_quit_pressed() -> void:
   GameManager.play_button_click()
   quit_confirm_dialog.show_dialog("게임을 종료할까요?")
 
-func _show_prologue() -> void:
-  var prologue = preload("res://scripts/prologue.gd").new()
-  add_child(prologue)
-  prologue.finished.connect(_on_prologue_finished)
-  _on_panel_opened()
-
-func _on_prologue_finished() -> void:
-  GameManager.prologue_seen = true
-  SaveManager.save_game()
-  _on_panel_closed()
-
 func _setup_item_badge() -> void:
   _item_badge = Label.new()
   _item_badge.text = "!"

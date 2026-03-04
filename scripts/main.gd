@@ -3,13 +3,13 @@ extends Node2D
 const SESSION_TIME: float = 45.0
 
 const BGM_PATHS: Array = [
-  "res://resources/sounds/bgm_world_1.ogg",
-  "res://resources/sounds/bgm_world_2.ogg",
-  "res://resources/sounds/bgm_world_2.ogg",
-  "res://resources/sounds/bgm_world_3.ogg",
-  "res://resources/sounds/bgm_world_3.ogg",
-  "res://resources/sounds/bgm_world_4.ogg",
-  "res://resources/sounds/bgm_world_4.ogg",
+  "res://resources/sounds/bgm_슬라임늪.ogg",
+  "res://resources/sounds/bgm_들판_기사의성벽.ogg",
+  "res://resources/sounds/bgm_들판_기사의성벽.ogg",
+  "res://resources/sounds/bgm_마법의숲.ogg",
+  "res://resources/sounds/bgm_수정호수.ogg",
+  "res://resources/sounds/bgm_고대유적_용의봉우리.ogg",
+  "res://resources/sounds/bgm_고대유적_용의봉우리.ogg",
 ]
 
 @onready var world_root: Node2D = $WorldRoot

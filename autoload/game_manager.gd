@@ -13,7 +13,6 @@ var selected_world: int = 0
 var unlocked_worlds: Array = [0]
 var owned_keys: Array = []
 var truck_assembled: bool = false
-var prologue_seen: bool = false
 const WORLD_UNLOCK_COSTS: Array = [0, 100, 5000, 10000, 25000, 50000, 80000]
 
 const WORLD_GRASS_HP_MULT: Array = [1.0, 1.3, 1.69, 2.2, 2.86, 3.71, 4.83]
@@ -991,7 +990,6 @@ func get_save_data() -> Dictionary:
     "unlocked_worlds": unlocked_worlds,
     "owned_keys": owned_keys,
     "truck_assembled": truck_assembled,
-    "prologue_seen": prologue_seen,
     "world_strength_levels": world_strength_levels.duplicate(),
   }
 
@@ -1016,7 +1014,6 @@ func load_save_data(data: Dictionary) -> void:
   if 0 not in unlocked_worlds:
     unlocked_worlds.append(0)
   truck_assembled = data.get("truck_assembled", false)
-  prologue_seen = data.get("prologue_seen", false)
   var saved_keys = data.get("owned_keys", [])
   owned_keys = []
   for k in saved_keys:
