@@ -161,7 +161,11 @@ signal boss_key_collected(world_index: int)
 
 var fury: float = 0.0
 var session_key_acquired: int = -1
-const FURY_MAX: float = 100.0
+const FURY_THRESHOLDS: Array = [250.0, 600.0, 1500.0, 4000.0]
+
+func get_fury_max() -> float:
+  var idx = clampi(selected_world, 0, FURY_THRESHOLDS.size() - 1)
+  return FURY_THRESHOLDS[idx]
 
 var _sfx_click: AudioStreamPlayer
 var _sfx_confirm: AudioStreamPlayer
@@ -438,9 +442,10 @@ func get_random_grass_data() -> GrassData:
     return grass_data_list[base_type]
 
 func add_fury(amount: float) -> void:
-  fury = minf(fury + amount * get_fury_rate_mult(), FURY_MAX)
+  var fury_max = get_fury_max()
+  fury = minf(fury + amount * get_fury_rate_mult(), fury_max)
   fury_changed.emit(fury)
-  if fury >= FURY_MAX:
+  if fury >= fury_max:
     fury_boss_requested.emit()
     fury = 0.0
     fury_changed.emit(fury)
