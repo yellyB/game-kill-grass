@@ -166,7 +166,11 @@ func _on_fury_boss_requested() -> void:
   monster.is_boss_entering = true
   monster.visible = false
   fury_boss_alive = true
-  monster.tree_exited.connect(func(): fury_boss_alive = false)
+  GameManager.fury_boss_alive = true
+  monster.tree_exited.connect(func():
+    fury_boss_alive = false
+    GameManager.fury_boss_alive = false
+  )
   get_parent().add_child(monster)
   _play_boss_entrance(monster)
 
