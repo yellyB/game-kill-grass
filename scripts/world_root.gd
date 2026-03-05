@@ -5,13 +5,13 @@ var player: CharacterBody2D = null
 var background: ColorRect = null
 
 const WORLD_BG_COLORS: Array = [
-	Color(0.2, 0.4, 0.2, 1),
-	Color(0.4, 0.35, 0.2, 1),
-	Color(0.3, 0.35, 0.45, 1),
-	Color(0.15, 0.18, 0.35, 1),
-	Color(0.15, 0.3, 0.4, 1),
+	Color(0.25, 0.37, 0.25, 1),
+	Color(0.52, 0.45, 0.28, 1),
+	Color(0.28, 0.3, 0.36, 1),
+	Color(0.24, 0.2, 0.4, 1),
+	Color(0.12, 0.32, 0.38, 1),
 	Color(0.3, 0.3, 0.2, 1),
-	Color(0.3, 0.18, 0.15, 1),
+	Color(0.35, 0.22, 0.18, 1),
 ]
 
 func _ready() -> void:
