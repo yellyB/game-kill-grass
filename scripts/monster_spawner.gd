@@ -134,7 +134,7 @@ func _spawn_chest_at_chunk(chunk_coord: Vector2i) -> void:
   chest.position = pos
   get_parent().add_child(chest)
 
-const BOSS_CLEAR_REWARDS: Array = [10, 80, 500, 2000, 6500, 12000, 30000]
+const BOSS_CLEAR_REWARDS: Array = [30, 300, 1000, 3000, 10000, 30000, 60000]
 
 const LAST_WORLD_POTION: String = "졸음 약"
 
