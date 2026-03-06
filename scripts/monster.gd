@@ -161,6 +161,8 @@ func play_boss_entrance() -> void:
   hit_area.set_deferred("monitoring", false)
   hit_area.set_deferred("monitorable", false)
 
+  Input.vibrate_handheld(1000)
+
   var tween = create_tween()
   tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
   tween.set_parallel(true)
@@ -174,7 +176,6 @@ func play_boss_entrance() -> void:
   var camera = get_tree().get_first_node_in_group("camera")
   if camera and camera.has_method("shake"):
     camera.shake(0.8)
-  Input.vibrate_handheld(200)
 
   hit_area.set_deferred("monitoring", true)
   hit_area.set_deferred("monitorable", true)
