@@ -9,8 +9,6 @@ const SFX_COIN = preload("res://resources/sounds/effect/pick_coin.wav")
 
 @export var move_speed: float = 300.0
 
-const DEBUG_SHOW_RANGES: bool = true
-
 var is_hit_debuffed: bool = false
 var is_invincible: bool = false
 var hit_debuff_timer: float = 0.0
@@ -697,7 +695,7 @@ func _create_circle_polygon(radius: float, segments: int) -> Polygon2D:
   return poly
 
 func _draw() -> void:
-  if not DEBUG_SHOW_RANGES:
+  if not GameManager.debug_mode:
     return
 
   var body_radius = 40.0
