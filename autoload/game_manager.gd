@@ -107,7 +107,7 @@ const SKILL_GROUPS: Array = [
   },
   {
     "name": "수확",
-    "skills": ["grass_density", "grass_quality", "magnet_range", "golden_chance", "attack_count", "golden_reward"],
+    "skills": ["grass_density", "grass_quality", "attack_count", "golden_chance", "magnet_range", "golden_reward"],
     "columns": 2,
   },
   {
@@ -661,9 +661,9 @@ const SKILL_PREREQS = {
   "monster_damage:1": [{"type": "attack_range", "level": 1}],
   "crit_damage:1": [{"type": "crit_chance", "level": 1}],
   "grass_quality:1": [{"type": "grass_density", "level": 1}],
-  "magnet_range:1": [{"type": "grass_density", "level": 1}],
+  "attack_count:1": [{"type": "grass_density", "level": 1}],
   "golden_chance:1": [{"type": "grass_quality", "level": 1}],
-  "attack_count:1": [{"type": "magnet_range", "level": 1}],
+  "magnet_range:1": [{"type": "attack_count", "level": 1}],
   "golden_reward:1": [{"type": "golden_chance", "level": 1}],
   "session_time:1": [{"type": "move_speed", "level": 1}],
   "chest_chance:1": [{"type": "move_speed", "level": 1}],
@@ -775,43 +775,6 @@ const ATTACK_POWER_TICK_COSTS: Array = [
   [300000, 30000],
   [800000, 80000],
 ]
-const DENSITY_TICK_COSTS: Array = [
-  [0, 0],
-  [15, 2],
-  [80, 10],
-  [1000, 200],
-  [8000, 800],
-  [40000, 4000],
-  [120000, 10000],
-  [350000, 30000],
-]
-const QUALITY_COSTS: Array = [15, 35, 60, 400, 1000, 2500, 6000, 15000]
-const ATTACK_RANGE_TICK_COSTS: Array = [
-  [10, 1],
-  [25, 2],
-  [60, 3],
-  [1000, 100],
-  [3000, 300],
-  [8000, 800],
-  [20000, 2000],
-  [50000, 5000],
-  [120000, 10000],
-  [280000, 25000],
-]
-const SESSION_TIME_TICK_COSTS: Array = [
-  [20, 5],
-  [200, 30],
-  [800, 100],
-  [5000, 1500],
-  [40000, 23000],
-]
-const CHEST_CHANCE_TICK_COSTS: Array = [
-  [15, 2],
-  [40, 5],
-  [80, 8],
-  [1000, 100],
-  [30000, 3000],
-]
 const ATTACK_SPEED_TICK_COSTS: Array = [
   [15, 2],
   [40, 5],
@@ -825,6 +788,18 @@ const ATTACK_SPEED_TICK_COSTS: Array = [
   [420000, 37500],
   [975000, 82500],
   [2250000, 180000],
+]
+const ATTACK_RANGE_TICK_COSTS: Array = [
+  [10, 1],
+  [25, 2],
+  [60, 3],
+  [1000, 100],
+  [3000, 300],
+  [8000, 800],
+  [20000, 2000],
+  [50000, 5000],
+  [120000, 10000],
+  [280000, 25000],
 ]
 const CRIT_CHANCE_TICK_COSTS: Array = [
   [20, 2],
@@ -845,19 +820,6 @@ const MONSTER_DAMAGE_TICK_COSTS: Array = [
   [100000, 10000],
   [170000, 17000],
 ]
-const FURY_RATE_TICK_COSTS: Array = [
-  [50, 6],
-  [120, 10],
-  [500, 50],
-  [3000, 300],
-]
-const GOLDEN_CHANCE_TICK_COSTS: Array = [
-  [20, 2],
-  [150, 30],
-  [500, 60],
-  [900, 120],
-  [2000, 250],
-]
 const CRIT_DAMAGE_TICK_COSTS: Array = [
   [50, 5],
   [100, 8],
@@ -866,23 +828,44 @@ const CRIT_DAMAGE_TICK_COSTS: Array = [
   [2800, 280],
   [10000, 1000],
 ]
-const GOLDEN_REWARD_TICK_COSTS: Array = [
-  [50, 5],
-  [100, 8],
-  [180, 14],
-  [700, 70],
-  [2800, 280],
-]
-const MOVE_SPEED_TICK_COSTS: Array = [
+
+const DENSITY_TICK_COSTS: Array = [
   [1, 1],
-  [10, 1],
-  [80, 8],
+  [15, 2],
+  [80, 10],
+  [1000, 200],
+  [8000, 800],
+  [40000, 4000],
+  [120000, 10000],
+  [350000, 30000],
+]
+const QUALITY_TICK_COSTS: Array = [
+  [15, 1],
+  [20, 1],
+  [80, 5],
+  [400, 30],
+  [1000, 80],
+  [2500, 200],
+  [6000, 500],
+  [15000, 1200],
+]
+const ATTACK_COUNT_TICK_COSTS: Array = [
+  [20, 5],
   [300, 30],
-  [3000, 300],
+  [1000, 500],
+  [30000, 3000],
+  [100000, 20000],
+]
+const GOLDEN_CHANCE_TICK_COSTS: Array = [
+  [20, 2],
+  [150, 30],
+  [500, 60],
+  [900, 120],
+  [2000, 250],
 ]
 const MAGNET_TICK_COSTS: Array = [
-  [12, 2],
-  [30, 4],
+  [20, 2],
+  [40, 4],
   [80, 8],
   [200, 15],
   [500, 35],
@@ -890,12 +873,40 @@ const MAGNET_TICK_COSTS: Array = [
   [10000, 1000],
   [50000, 5000],
 ]
-const ATTACK_COUNT_TICK_COSTS: Array = [
-  [50, 6],
-  [250, 20],
-  [1000, 500],
+const GOLDEN_REWARD_TICK_COSTS: Array = [
+  [50, 5],
+  [100, 8],
+  [180, 14],
+  [700, 70],
+  [2800, 280],
+]
+
+const MOVE_SPEED_TICK_COSTS: Array = [
+  [0, 0],
+  [10, 1],
+  [80, 8],
+  [300, 30],
+  [3000, 300],
+]
+const SESSION_TIME_TICK_COSTS: Array = [
+  [20, 5],
+  [200, 30],
+  [800, 100],
+  [5000, 1500],
+  [40000, 23000],
+]
+const CHEST_CHANCE_TICK_COSTS: Array = [
+  [15, 2],
+  [40, 5],
+  [80, 8],
+  [1000, 100],
   [30000, 3000],
-  [100000, 20000],
+]
+const FURY_RATE_TICK_COSTS: Array = [
+  [50, 6],
+  [120, 10],
+  [500, 50],
+  [3000, 300],
 ]
 
 func get_upgrade_cost(current_level: int, upgrade_type: String = "") -> int:
@@ -915,28 +926,8 @@ func get_upgrade_cost(current_level: int, upgrade_type: String = "") -> int:
 func _get_raw_upgrade_cost(current_level: int, upgrade_type: String = "") -> int:
   var sub = upgrade_sub_levels.get(upgrade_type, 0)
 
-  if current_level == 0 and upgrade_type == "grass_density":
-    return 1 + sub
-
-  if upgrade_type == "grass_quality":
-    if current_level == 0:
-      return 15 + sub
-    if current_level == 1:
-      return 20 + sub
-    if current_level == 2:
-      return 80 + sub * 5
-    if current_level == 3:
-      return 400 + sub * 30
-    if current_level == 4:
-      return 1000 + sub * 80
-    if current_level == 5:
-      return 2500 + sub * 200
-    if current_level == 6:
-      return 6000 + sub * 500
-    if current_level == 7:
-      return 15000 + sub * 1200
-    return 15000 + sub * 1200
-
+  if current_level == 0 and upgrade_type == "move_speed":
+    return 1 + sub / 2
 
   var tier_costs: Array
   var SKILL_TICK_COSTS: Dictionary = {
@@ -946,7 +937,7 @@ func _get_raw_upgrade_cost(current_level: int, upgrade_type: String = "") -> int
     "attack_count": ATTACK_COUNT_TICK_COSTS,
     "magnet_range": MAGNET_TICK_COSTS,
     "grass_density": DENSITY_TICK_COSTS,
-    "grass_quality": [],
+    "grass_quality": QUALITY_TICK_COSTS,
     "golden_chance": GOLDEN_CHANCE_TICK_COSTS,
     "golden_reward": GOLDEN_REWARD_TICK_COSTS,
     "crit_chance": CRIT_CHANCE_TICK_COSTS,
