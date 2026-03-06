@@ -223,9 +223,35 @@ func show_session_end_overlay(earnings: int) -> void:
 
   var fade_rows: Array[Control] = []
 
+  var earn_block = VBoxContainer.new()
+  earn_block.add_theme_constant_override("separation", 6)
+  earn_block.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+  var collect_amount = earnings - GameManager.session_boss_reward
+  var collect_label = Label.new()
+  collect_label.text = "+ 수집 %s" % GameManager.format_number(collect_amount)
+  collect_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+  collect_label.add_theme_font_size_override("font_size", 30)
+  collect_label.add_theme_color_override("font_color", Color(0.7, 0.9, 0.7))
+  collect_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+  collect_label.add_theme_constant_override("outline_size", 3)
+  collect_label.modulate = Color(1, 1, 1, 0)
+  earn_block.add_child(collect_label)
+  fade_rows.append(collect_label)
+
+  var boss_label = Label.new()
+  boss_label.text = "+ 보너스 %s" % GameManager.format_number(GameManager.session_boss_reward)
+  boss_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+  boss_label.add_theme_font_size_override("font_size", 30)
+  boss_label.add_theme_color_override("font_color", Color(0.7, 0.9, 0.7))
+  boss_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+  boss_label.add_theme_constant_override("outline_size", 3)
+  boss_label.modulate = Color(1, 1, 1, 0)
+  earn_block.add_child(boss_label)
+  fade_rows.append(boss_label)
+
   var earnings_container = HBoxContainer.new()
-  earnings_container.alignment = BoxContainer.ALIGNMENT_CENTER
-  earnings_container.add_theme_constant_override("separation", 6)
+  earnings_container.add_theme_constant_override("separation", 4)
   earnings_container.modulate = Color(1, 1, 1, 0)
 
   var prefix_label = Label.new()
@@ -239,8 +265,10 @@ func show_session_end_overlay(earnings: int) -> void:
   var coin_hbox = GameManager.create_coin_label(
     GameManager.format_number(earnings), 42, Color(0.3, 1.0, 0.5), 4)
   earnings_container.add_child(coin_hbox)
-  results_vbox.add_child(earnings_container)
+  earn_block.add_child(earnings_container)
   fade_rows.append(earnings_container)
+
+  results_vbox.add_child(earn_block)
 
   var key_world = GameManager.session_key_acquired
   if key_world >= 0:
@@ -283,26 +311,6 @@ func show_session_end_overlay(earnings: int) -> void:
 
     results_vbox.add_child(gem_container)
     fade_rows.append(gem_container)
-
-  if GameManager.session_boss_reward > 0:
-    var bonus_container = HBoxContainer.new()
-    bonus_container.alignment = BoxContainer.ALIGNMENT_CENTER
-    bonus_container.add_theme_constant_override("separation", 6)
-    bonus_container.modulate = Color(1, 1, 1, 0)
-
-    var bonus_plus = Label.new()
-    bonus_plus.text = "+ "
-    bonus_plus.add_theme_font_size_override("font_size", 40)
-    bonus_plus.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
-    bonus_plus.add_theme_color_override("font_outline_color", Color(0, 0, 0))
-    bonus_plus.add_theme_constant_override("outline_size", 4)
-    bonus_container.add_child(bonus_plus)
-
-    var bonus_coin = GameManager.create_coin_label(
-      GameManager.format_number(GameManager.session_boss_reward), 40, Color(1, 0.9, 0.3), 4)
-    bonus_container.add_child(bonus_coin)
-    results_vbox.add_child(bonus_container)
-    fade_rows.append(bonus_container)
 
   main_vbox.add_child(results_vbox)
 
