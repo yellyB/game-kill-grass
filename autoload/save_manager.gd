@@ -61,6 +61,7 @@ func reset_all_data() -> void:
 	GameManager.unlocked_worlds = [0]
 	GameManager.owned_keys = []
 	GameManager.has_potion = false
+	GameManager.owned_gems = 0
 	GameManager.world_strength_levels = {}
 	GameManager.money_changed.emit(0)
 	WeaponManager.current_weapon_level = 0

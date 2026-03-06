@@ -153,6 +153,9 @@ func _on_fury_boss_requested() -> void:
   if _is_world_cleared(world):
     var reward = BOSS_CLEAR_REWARDS[world] if world < BOSS_CLEAR_REWARDS.size() else 0
     config["boss_reward"] = reward
+    var strength = GameManager.get_world_strength_level(world)
+    if strength > 0:
+      config["boss_gems"] = strength
   elif is_last:
     config["boss_potion"] = LAST_WORLD_POTION
   elif world + 1 < GameManager.WORLD_UNLOCK_COSTS.size():

@@ -11,6 +11,8 @@ var selected_world: int = 0
 var unlocked_worlds: Array = [0]
 var owned_keys: Array = []
 var has_potion: bool = false
+var owned_gems: int = 0
+var session_gems: int = 0
 const WORLD_UNLOCK_COSTS: Array = [0, 100, 1000, 10000, 25000, 50000, 100000]
 
 const WORLD_GRASS_HP_MULT: Array = [1.0, 1.3, 1.69, 2.2, 2.86, 3.71, 4.83]
@@ -37,8 +39,12 @@ func get_strengthen_cost(world: int) -> int:
   var level = get_world_strength_level(world)
   return int(base * pow(3, level))
 
+const MAX_STRENGTH_LEVEL: int = 3
+
 func strengthen_world(world: int) -> bool:
   if not is_world_cleared(world):
+    return false
+  if get_world_strength_level(world) >= MAX_STRENGTH_LEVEL:
     return false
   var cost = get_strengthen_cost(world)
   if money < cost:
@@ -1066,6 +1072,7 @@ func get_save_data() -> Dictionary:
     "unlocked_worlds": unlocked_worlds,
     "owned_keys": owned_keys,
     "has_potion": has_potion,
+    "owned_gems": owned_gems,
     "world_strength_levels": world_strength_levels.duplicate(),
   }
 
@@ -1088,6 +1095,7 @@ func load_save_data(data: Dictionary) -> void:
   if 0 not in unlocked_worlds:
     unlocked_worlds.append(0)
   has_potion = data.get("has_potion", false)
+  owned_gems = int(data.get("owned_gems", 0))
   var saved_keys = data.get("owned_keys", [])
   owned_keys = []
   for k in saved_keys:
@@ -1099,6 +1107,10 @@ func load_save_data(data: Dictionary) -> void:
   money_changed.emit(money)
   WeaponManager.current_weapon_level = upgrade_levels.get("attack_power", 0)
   WeaponManager.weapon_changed.emit(WeaponManager.current_weapon_level)
+
+func add_gem(count: int = 1) -> void:
+  session_gems += count
+  owned_gems += count
 
 func finalize_session() -> void:
   money += session_money
@@ -1119,4 +1131,5 @@ func reset_session_data() -> void:
   fury = 0.0
   session_key_acquired = -1
   session_boss_reward = 0
+  session_gems = 0
   session_money_changed.emit(0)

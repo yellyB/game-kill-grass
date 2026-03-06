@@ -37,6 +37,7 @@ var collision_base_scale: float = 0.0
 var collision_rotation: float = 0.0
 var key_world_index: int = -1
 var boss_reward: int = 0
+var boss_gems: int = 0
 var boss_potion: String = ""
 var is_fury_boss: bool = false
 var is_boss_entering: bool = false
@@ -56,6 +57,7 @@ func setup(config: Dictionary) -> void:
   collision_rotation = config.get("collision_rotation", 0.0)
   key_world_index = config.get("key_world_index", -1)
   boss_reward = config.get("boss_reward", 0)
+  boss_gems = config.get("boss_gems", 0)
   boss_potion = config.get("boss_potion", "")
   is_fury_boss = config.get("is_fury_boss", false)
 
@@ -238,7 +240,7 @@ func die() -> void:
     _drop_key()
   elif boss_potion != "":
     _drop_potion()
-  elif boss_reward > 0:
+  elif boss_reward > 0 or boss_gems > 0:
     _drop_boss_reward()
   elif is_fury_boss:
     GameManager.boss_key_collected.emit(-1)
@@ -251,14 +253,25 @@ func die() -> void:
   queue_free()
 
 func _drop_boss_reward() -> void:
-  GameManager.session_boss_reward = boss_reward
-  GameManager.add_money(boss_reward)
-  var coin_count = 7
-  for i in coin_count:
-    var coin = CoinScene.instantiate()
-    coin.position = position
-    coin.boss_drop = true
-    get_parent().add_child(coin)
+  if boss_reward > 0:
+    GameManager.session_boss_reward = boss_reward
+    GameManager.add_money(boss_reward)
+    var coin_count = 7
+    for i in coin_count:
+      var coin = CoinScene.instantiate()
+      coin.position = position
+      coin.boss_drop = true
+      get_parent().add_child(coin)
+
+  if boss_gems > 0:
+    var player = get_tree().get_first_node_in_group("player")
+    if player:
+      for i in boss_gems:
+        var item = DroppedItemScene.instantiate()
+        item.setup_gem(player)
+        item.position = position + Vector2(randf_range(-30, 30), randf_range(-30, 30))
+        get_parent().add_child(item)
+
   get_tree().create_timer(1.0).timeout.connect(func():
     GameManager.boss_key_collected.emit(-1)
   )
