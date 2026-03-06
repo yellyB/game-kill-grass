@@ -76,8 +76,8 @@ signal world_unlocked(index: int)
 const SKILL_DEFS: Array = [
   {"type": "attack_speed", "name": "공격 속도", "short_name": "공속", "sub_max": 5, "max_level": 6,
    "description": "다음 공격까지의 대기 시간이 짧아집니다.\n공격 간격: 0.70초 → 0.10초 (틱당 -0.02초)\n단계 5 | 최대 Lv.6"},
-  {"type": "attack_range", "name": "공격 범위", "short_name": "범위", "sub_max": 5, "max_level": 10,
-   "description": "공격 범위가 넓어집니다.\n범위: 60 → 260 (틱당 +4)\n단계 5 | 최대 Lv.10"},
+  {"type": "attack_range", "name": "공격 범위", "short_name": "범위", "sub_max": 5, "max_level": 8,
+   "description": "공격 범위가 넓어집니다.\n범위: 60 → 260 (틱당 +5)\n단계 5 | 최대 Lv.8"},
   {"type": "attack_count", "name": "공격 개수", "short_name": "개수", "sub_max": 3, "max_level": 5,
    "description": "한 번에 베는 풀의 개수가 증가합니다.\n횟수: 1 → 46 (레벨별 +1/+2/+3/+4/+5)\n단계 3 | 최대 Lv.5"},
   {"type": "magnet_range", "name": "수집 범위", "short_name": "수집", "sub_max": 5, "max_level": 8,
@@ -521,7 +521,7 @@ func get_attack_interval() -> float:
 
 func get_attack_range() -> float:
   var ticks = get_skill_total_progress("attack_range")
-  return 60.0 + ticks * 4.0
+  return 60.0 + ticks * 5.0
 
 func get_attack_count() -> int:
   var level = upgrade_levels.get("attack_count", 0)
@@ -869,10 +869,8 @@ const ATTACK_RANGE_TICK_COSTS: Array = [
   [1000, 100],
   [3000, 300],
   [8000, 800],
-  [20000, 2000],
-  [50000, 5000],
-  [120000, 10000],
-  [280000, 25000],
+  [25000, 2500],
+  [70000, 7000],
 ]
 const CRIT_CHANCE_TICK_COSTS: Array = [
   [20, 2],
