@@ -271,6 +271,7 @@ func _drop_boss_reward() -> void:
         item.setup_gem(player)
         item.position = position + Vector2(randf_range(-30, 30), randf_range(-30, 30))
         get_parent().add_child(item)
+      GameManager.mark_gems_collected(GameManager.selected_world, boss_gems)
 
   get_tree().create_timer(1.0).timeout.connect(func():
     GameManager.boss_key_collected.emit(-1)

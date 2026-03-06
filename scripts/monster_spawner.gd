@@ -154,7 +154,7 @@ func _on_fury_boss_requested() -> void:
     var reward = BOSS_CLEAR_REWARDS[world] if world < BOSS_CLEAR_REWARDS.size() else 0
     config["boss_reward"] = reward
     var strength = GameManager.get_world_strength_level(world)
-    if strength > 0:
+    if strength > 0 and not GameManager.has_collected_gems(world, strength):
       config["boss_gems"] = strength
   elif is_last:
     config["boss_potion"] = LAST_WORLD_POTION
