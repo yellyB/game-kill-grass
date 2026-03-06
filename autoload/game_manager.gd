@@ -914,7 +914,7 @@ func _get_raw_upgrade_cost(current_level: int, upgrade_type: String = "") -> int
   var sub = upgrade_sub_levels.get(upgrade_type, 0)
 
   if current_level == 0 and upgrade_type == "grass_density":
-    return sub / 2 + 1
+    return 1 + sub
 
   if upgrade_type == "grass_quality":
     if current_level == 0:
