@@ -217,15 +217,28 @@ func show_session_end_overlay(earnings: int) -> void:
   gap1.custom_minimum_size = Vector2(0, 60)
   main_vbox.add_child(gap1)
 
-  var results_vbox = VBoxContainer.new()
-  results_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-  results_vbox.add_theme_constant_override("separation", 12)
-
   var fade_rows: Array[Control] = []
 
-  var earn_block = VBoxContainer.new()
-  earn_block.add_theme_constant_override("separation", 6)
-  earn_block.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+  var info_block = VBoxContainer.new()
+  info_block.add_theme_constant_override("separation", 10)
+  info_block.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+  var earnings_container = HBoxContainer.new()
+  earnings_container.add_theme_constant_override("separation", 4)
+  earnings_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+  earnings_container.modulate = Color(1, 1, 1, 0)
+  var prefix_label = Label.new()
+  prefix_label.text = "총 획득 코인: "
+  prefix_label.add_theme_font_size_override("font_size", 42)
+  prefix_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+  prefix_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+  prefix_label.add_theme_constant_override("outline_size", 4)
+  earnings_container.add_child(prefix_label)
+  var coin_hbox = GameManager.create_coin_label(
+    GameManager.format_number(earnings), 42, Color(0.3, 1.0, 0.5), 4)
+  earnings_container.add_child(coin_hbox)
+  info_block.add_child(earnings_container)
+  fade_rows.append(earnings_container)
 
   var collect_amount = earnings - GameManager.session_boss_reward
   var collect_label = Label.new()
@@ -236,7 +249,7 @@ func show_session_end_overlay(earnings: int) -> void:
   collect_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
   collect_label.add_theme_constant_override("outline_size", 3)
   collect_label.modulate = Color(1, 1, 1, 0)
-  earn_block.add_child(collect_label)
+  info_block.add_child(collect_label)
   fade_rows.append(collect_label)
 
   var boss_label = Label.new()
@@ -247,72 +260,52 @@ func show_session_end_overlay(earnings: int) -> void:
   boss_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
   boss_label.add_theme_constant_override("outline_size", 3)
   boss_label.modulate = Color(1, 1, 1, 0)
-  earn_block.add_child(boss_label)
+  info_block.add_child(boss_label)
   fade_rows.append(boss_label)
-
-  var earnings_container = HBoxContainer.new()
-  earnings_container.add_theme_constant_override("separation", 4)
-  earnings_container.modulate = Color(1, 1, 1, 0)
-
-  var prefix_label = Label.new()
-  prefix_label.text = "획득: "
-  prefix_label.add_theme_font_size_override("font_size", 42)
-  prefix_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
-  prefix_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
-  prefix_label.add_theme_constant_override("outline_size", 4)
-  earnings_container.add_child(prefix_label)
-
-  var coin_hbox = GameManager.create_coin_label(
-    GameManager.format_number(earnings), 42, Color(0.3, 1.0, 0.5), 4)
-  earnings_container.add_child(coin_hbox)
-  earn_block.add_child(earnings_container)
-  fade_rows.append(earnings_container)
-
-  results_vbox.add_child(earn_block)
-
-  var key_world = GameManager.session_key_acquired
-  if key_world >= 0:
-    var world_names = ["슬라임 늪", "들판", "기사의 성벽", "마법의 숲", "수정 호수", "고대 유적", "용의 봉우리"]
-    var world_name = world_names[key_world] if key_world < world_names.size() else "월드 %d" % key_world
-    var key_label = Label.new()
-    key_label.text = "+ 열쇠 (%s)" % world_name
-    key_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    key_label.add_theme_font_size_override("font_size", 40)
-    key_label.add_theme_color_override("font_color", Color(0.3, 1.0, 1.0))
-    key_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
-    key_label.add_theme_constant_override("outline_size", 4)
-    key_label.modulate = Color(1, 1, 1, 0)
-    results_vbox.add_child(key_label)
-    fade_rows.append(key_label)
 
   if GameManager.session_gems > 0:
     var gem_container = HBoxContainer.new()
-    gem_container.alignment = BoxContainer.ALIGNMENT_CENTER
     gem_container.add_theme_constant_override("separation", 6)
+    gem_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
     gem_container.modulate = Color(1, 1, 1, 0)
 
-    var gem_plus = Label.new()
-    gem_plus.text = "+ "
-    gem_plus.add_theme_font_size_override("font_size", 40)
-    gem_plus.add_theme_color_override("font_color", Color(0.95, 0.3, 0.5))
-    gem_plus.add_theme_color_override("font_outline_color", Color(0, 0, 0))
-    gem_plus.add_theme_constant_override("outline_size", 4)
-    gem_container.add_child(gem_plus)
-
-    gem_container.add_child(_create_gem_icon(34))
+    gem_container.add_child(_create_gem_icon(42))
 
     var gem_count = Label.new()
     gem_count.text = "x%d" % GameManager.session_gems
-    gem_count.add_theme_font_size_override("font_size", 40)
+    gem_count.add_theme_font_size_override("font_size", 42)
     gem_count.add_theme_color_override("font_color", Color(0.95, 0.3, 0.5))
     gem_count.add_theme_color_override("font_outline_color", Color(0, 0, 0))
     gem_count.add_theme_constant_override("outline_size", 4)
     gem_container.add_child(gem_count)
 
-    results_vbox.add_child(gem_container)
+    info_block.add_child(gem_container)
     fade_rows.append(gem_container)
 
-  main_vbox.add_child(results_vbox)
+  var key_world = GameManager.session_key_acquired
+  if key_world >= 0:
+    var world_names = ["슬라임 늪", "들판", "기사의 성벽", "마법의 숲", "수정 호수", "고대 유적", "용의 봉우리"]
+    var world_name = world_names[key_world] if key_world < world_names.size() else "월드 %d" % key_world
+    var key_row = HBoxContainer.new()
+    key_row.add_theme_constant_override("separation", 10)
+    key_row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+    key_row.modulate = Color(1, 1, 1, 0)
+
+    var key_icon = _create_key_icon(42)
+    key_row.add_child(key_icon)
+
+    var key_label = Label.new()
+    key_label.text = "(%s)" % world_name
+    key_label.add_theme_font_size_override("font_size", 42)
+    key_label.add_theme_color_override("font_color", Color(0.3, 1.0, 1.0))
+    key_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+    key_label.add_theme_constant_override("outline_size", 4)
+    key_row.add_child(key_label)
+
+    info_block.add_child(key_row)
+    fade_rows.append(key_row)
+
+  main_vbox.add_child(info_block)
 
   var gap2 = Control.new()
   gap2.custom_minimum_size = Vector2(0, 110)
@@ -373,6 +366,35 @@ func _create_gem_icon(icon_size: int) -> Control:
     Vector2(cx - sx, cy - sy * 0.35),
   ])
   container.add_child(hl)
+  return container
+
+func _create_key_icon(icon_size: int) -> Control:
+  var container = Control.new()
+  container.custom_minimum_size = Vector2(icon_size, icon_size)
+  var s = icon_size / 28.0
+  var cx = icon_size * 0.5
+  var cy = icon_size * 0.5
+  var head = Polygon2D.new()
+  head.color = Color(0.3, 1.0, 1.0)
+  head.polygon = PackedVector2Array([
+    Vector2(cx - 8 * s, cy - 14 * s), Vector2(cx + 8 * s, cy - 14 * s),
+    Vector2(cx + 8 * s, cy - 2 * s), Vector2(cx - 8 * s, cy - 2 * s)
+  ])
+  container.add_child(head)
+  var shaft = Polygon2D.new()
+  shaft.color = Color(0.2, 0.8, 0.8)
+  shaft.polygon = PackedVector2Array([
+    Vector2(cx - 3 * s, cy - 2 * s), Vector2(cx + 3 * s, cy - 2 * s),
+    Vector2(cx + 3 * s, cy + 14 * s), Vector2(cx - 3 * s, cy + 14 * s)
+  ])
+  container.add_child(shaft)
+  var tooth = Polygon2D.new()
+  tooth.color = Color(0.2, 0.8, 0.8)
+  tooth.polygon = PackedVector2Array([
+    Vector2(cx + 3 * s, cy + 8 * s), Vector2(cx + 8 * s, cy + 8 * s),
+    Vector2(cx + 8 * s, cy + 12 * s), Vector2(cx + 3 * s, cy + 12 * s)
+  ])
+  container.add_child(tooth)
   return container
 
 func _animate_tap_label(label: Label) -> void:
