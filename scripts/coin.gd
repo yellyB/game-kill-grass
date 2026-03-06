@@ -158,6 +158,7 @@ func update_visual() -> void:
 
 	var coin_body = visual.get_node_or_null("CoinBody")
 	var coin_shine = visual.get_node_or_null("CoinShine")
+	var coin_shadow_arc = visual.get_node_or_null("CoinShadowArc")
 
 	var is_diamond = value >= 1000
 	var diamond_polygon = PackedVector2Array([Vector2(-7, -10), Vector2(7, -10), Vector2(12, -3), Vector2(0, 14), Vector2(-12, -3)])
@@ -167,13 +168,28 @@ func update_visual() -> void:
 		if is_diamond:
 			coin_body.polygon = diamond_polygon
 	if coin_shine:
-		coin_shine.color = shine_color
+		coin_shine.visible = false
+	var shadow_color = Color(coin_color.r * 0.7, coin_color.g * 0.7, coin_color.b * 0.7, 0.6)
+	if not coin_shadow_arc:
+		coin_shadow_arc = Line2D.new()
+		coin_shadow_arc.name = "CoinShadowArc"
+		coin_shadow_arc.width = 3.0
+		coin_shadow_arc.z_index = 1
+		visual.add_child(coin_shadow_arc)
+	coin_shadow_arc.default_color = shadow_color
+	coin_shadow_arc.visible = not is_diamond
+	var arc_points = PackedVector2Array()
+	if coin_body:
+		var poly = coin_body.polygon
+		for idx in [11, 0, 1, 2, 3]:
+			arc_points.append(poly[idx] * 0.65)
+	coin_shadow_arc.points = arc_points
 
 	if is_stacked and coin_body:
 		var edge_color = Color(coin_color.r * 0.4, coin_color.g * 0.4, coin_color.b * 0.4, 0.8)
 		coin_body.position = Vector2(0, -8)
-		if coin_shine:
-			coin_shine.position = Vector2(-3, -11)
+		if coin_shadow_arc:
+			coin_shadow_arc.position = Vector2(0, -8)
 		var bottom_offsets = [Vector2(-9, 6), Vector2(9, 6)]
 		for i in 2:
 			var stack = Polygon2D.new()
