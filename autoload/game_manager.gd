@@ -98,8 +98,8 @@ const SKILL_DEFS: Array = [
    "description": "맵 구획당 상자 등장 확률이 높아집니다.\n확률: 0% → 5% (틱당 +0.2%)\n단계 5 | 최대 Lv.5"},
   {"type": "crit_chance", "name": "치명타 확률", "short_name": "치확", "sub_max": 5, "max_level": 4,
    "description": "치명타 발생 확률이 높아집니다.\n확률: 0% → 80% (틱당 +4%)\n단계 5 | 최대 Lv.4"},
-  {"type": "crit_damage", "name": "치명타 피해", "short_name": "치피", "sub_max": 5, "max_level": 6,
-   "description": "치명타 피해량이 증가합니다.\n배율: 120% → 300% (틱당 +6%)\n단계 5 | 최대 Lv.6"},
+  {"type": "crit_damage", "name": "치명타 피해", "short_name": "치피", "sub_max": 5, "max_level": 5,
+   "description": "치명타 피해량이 증가합니다.\n배율: 120% → 270% (틱당 +6%)\n단계 5 | 최대 Lv.5"},
   {"type": "attack_power", "name": "공격력", "short_name": "공격력", "sub_max": 5, "max_level": 9,
    "description": "공격력이 증가합니다.\nLv.1~3: +1/틱, Lv.4~5: +2/틱\nLv.6~7: +3/틱, Lv.8~9: +4/틱\n단계 5 | 최대 Lv.9"},
   {"type": "monster_damage", "name": "몬스터 피해", "short_name": "몬피", "sub_max": 5, "max_level": 7,
@@ -900,9 +900,8 @@ const MONSTER_DAMAGE_TICK_COSTS: Array = [
 const CRIT_DAMAGE_TICK_COSTS: Array = [
   [50, 5],
   [1000, 80],
-  [4500, 360],
-  [30000, 2400],
-  [120000, 9600],
+  [6000, 500],
+  [60000, 5000],
   [580000, 46400],
 ]
 
