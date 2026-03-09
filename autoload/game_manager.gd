@@ -45,14 +45,22 @@ func get_strengthen_cost(world: int) -> int:
 
 const MAX_STRENGTH_LEVEL: int = 3
 
-func strengthen_world(world: int) -> bool:
+func can_strengthen_world(world: int) -> bool:
   if not is_world_cleared(world):
     return false
-  if get_world_strength_level(world) >= MAX_STRENGTH_LEVEL:
+  var level = get_world_strength_level(world)
+  if level >= MAX_STRENGTH_LEVEL:
+    return false
+  if level > 0 and not has_collected_gems(world, level):
+    return false
+  if money < get_strengthen_cost(world):
+    return false
+  return true
+
+func strengthen_world(world: int) -> bool:
+  if not can_strengthen_world(world):
     return false
   var cost = get_strengthen_cost(world)
-  if money < cost:
-    return false
   money -= cost
   world_strength_levels[world] = get_world_strength_level(world) + 1
   money_changed.emit(money)
