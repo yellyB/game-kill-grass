@@ -88,16 +88,16 @@ const SKILL_DEFS: Array = [
    "description": "공격 범위가 넓어집니다.\n범위: 60 → 260 (틱당 +5)\n단계 5 | 최대 Lv.8"},
   {"type": "attack_count", "name": "공격 개수", "short_name": "개수", "sub_max": 3, "max_level": 5,
    "description": "한 번에 베는 풀의 개수가 증가합니다.\n횟수: 1 → 46 (레벨별 +1/+2/+3/+4/+5)\n단계 3 | 최대 Lv.5"},
-  {"type": "magnet_range", "name": "수집 범위", "short_name": "수집", "sub_max": 5, "max_level": 8,
-   "description": "코인을 끌어당기는 범위가 넓어집니다.\n범위: 40 → 200 (틱당 +4)\n단계 5 | 최대 Lv.8"},
+  {"type": "magnet_range", "name": "수집 범위", "short_name": "수집", "sub_max": 5, "max_level": 6,
+   "description": "코인을 끌어당기는 범위가 넓어집니다.\n범위: 50 → 200 (틱당 +5)\n단계 5 | 최대 Lv.6"},
   {"type": "grass_density", "name": "풀 밀도", "short_name": "밀도", "sub_max": 5, "max_level": 8,
    "description": "맵 구획당 자라는 풀의 수가 증가합니다.\n구획당 풀: 1개 → 181개 (Lv별 틱당 +1/+2/.../+8)\n단계 5 | 최대 Lv.8"},
   {"type": "grass_quality", "name": "풀 등급", "short_name": "등급", "sub_max": 8, "max_level": 8,
    "description": "높은 등급의 풀로 자라날 확률이 높아집니다.\n홀수 레벨: 다음 등급 50%까지\n짝수 레벨: 다음 등급 100%까지\n단계 8 | 최대 Lv.8"},
   {"type": "chest_chance", "name": "상자 확률", "short_name": "상자", "sub_max": 5, "max_level": 5,
    "description": "맵 구획당 상자 등장 확률이 높아집니다.\n확률: 0% → 5% (틱당 +0.2%)\n단계 5 | 최대 Lv.5"},
-  {"type": "crit_chance", "name": "치명타 확률", "short_name": "치확", "sub_max": 5, "max_level": 8,
-   "description": "치명타 발생 확률이 높아집니다.\n확률: 0% → 80% (틱당 +2%)\n단계 5 | 최대 Lv.8"},
+  {"type": "crit_chance", "name": "치명타 확률", "short_name": "치확", "sub_max": 5, "max_level": 4,
+   "description": "치명타 발생 확률이 높아집니다.\n확률: 0% → 80% (틱당 +4%)\n단계 5 | 최대 Lv.4"},
   {"type": "crit_damage", "name": "치명타 피해", "short_name": "치피", "sub_max": 5, "max_level": 6,
    "description": "치명타 피해량이 증가합니다.\n배율: 120% → 300% (틱당 +6%)\n단계 5 | 최대 Lv.6"},
   {"type": "attack_power", "name": "공격력", "short_name": "공격력", "sub_max": 5, "max_level": 9,
@@ -152,7 +152,7 @@ var timed_buffs: Dictionary = {}
 
 var hit_penalty_active: bool = false
 
-var base_magnet_range: float = 40.0
+var base_magnet_range: float = 50.0
 
 const GRASS_DROP_CHANCE: float = 1.0
 
@@ -546,7 +546,7 @@ func get_attack_count() -> int:
 
 func get_base_magnet_range() -> float:
   var ticks = get_skill_total_progress("magnet_range")
-  return 40.0 + ticks * 4.0
+  return 50.0 + ticks * 5.0
 
 func get_grass_density_value() -> int:
   var ticks = get_skill_total_progress("grass_density")
@@ -570,7 +570,7 @@ func get_crit_chance() -> float:
   if session_buff_critical_surge:
     return 1.0
   var ticks = get_skill_total_progress("crit_chance")
-  return minf(ticks * 0.02, 0.8)
+  return minf(ticks * 0.04, 0.8)
 
 func get_crit_damage_mult() -> float:
   var ticks = get_skill_total_progress("crit_damage")
@@ -887,10 +887,6 @@ const CRIT_CHANCE_TICK_COSTS: Array = [
   [150, 12],
   [2400, 320],
   [23000, 2300],
-  [45000, 4500],
-  [120000, 12000],
-  [320000, 32000],
-  [570000, 57000],
 ]
 const MONSTER_DAMAGE_TICK_COSTS: Array = [
   [50, 6],
@@ -947,11 +943,9 @@ const GOLDEN_CHANCE_TICK_COSTS: Array = [
 const MAGNET_TICK_COSTS: Array = [
   [20, 2],
   [40, 4],
-  [80, 8],
-  [200, 15],
-  [1100, 110],
-  [6000, 600],
-  [33000, 3300],
+  [250, 25],
+  [4000, 500],
+  [40000, 5000],
   [200000, 20000],
 ]
 const GOLDEN_REWARD_TICK_COSTS: Array = [
@@ -994,14 +988,14 @@ const SKILL_GEM_COSTS: Dictionary = {
   "attack_power": {4: 1, 6: 2, 8: 3},
   "attack_speed": {4: 1, 5: 2, 6: 3},
   "attack_range": {6: 1},
-  "crit_chance": {5: 1},
+  "crit_chance": {4: 1},
   "monster_damage": {5: 1},
   "crit_damage": {5: 1},
   "grass_density": {5: 1, 7: 2},
   "grass_quality": {5: 1, 7: 2},
   "attack_count": {3: 1, 4: 2, 5: 3},
   "golden_chance": {5: 1},
-  "magnet_range": {6: 1, 8: 2},
+  "magnet_range": {5: 1, 6: 2},
   "golden_reward": {4: 1},
   "move_speed": {5: 1},
   "session_time": {3: 1, 5: 2},
