@@ -39,10 +39,11 @@ func _ready() -> void:
   upgrade_panel.panel_opened.connect(_on_panel_opened)
   upgrade_panel.panel_closed.connect(_on_panel_closed)
 
-  _build_debug_buttons()
-  _debug_container.visible = false
-  money_display.mouse_filter = Control.MOUSE_FILTER_STOP
-  money_display.gui_input.connect(_on_money_display_input)
+  if OS.has_feature("debug"):
+    _build_debug_buttons()
+    _debug_container.visible = false
+    money_display.mouse_filter = Control.MOUSE_FILTER_STOP
+    money_display.gui_input.connect(_on_money_display_input)
 
   var viewport_w = get_viewport_rect().size.x
 
@@ -677,6 +678,8 @@ func _close_world_select() -> void:
   _on_panel_closed()
 
 func _on_money_display_input(event: InputEvent) -> void:
+  if not OS.has_feature("debug"):
+    return
   if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
     var now = Time.get_ticks_msec() / 1000.0
     if now - _debug_last_tap_time > 3.0:
