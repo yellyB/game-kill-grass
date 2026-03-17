@@ -427,7 +427,61 @@ func _create_world_card(index: int) -> PanelContainer:
         str_btn.text = "초월"
         str_btn.pressed.connect(_on_strengthen_pressed.bind(index))
         GameManager.style_button(str_btn, "main")
+
       str_hbox.add_child(str_btn)
+
+      if strength == 0 and not GameManager.has_ever_transcended:
+        var bubble_root = VBoxContainer.new()
+        bubble_root.add_theme_constant_override("separation", -5)
+        bubble_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        str_btn.add_child(bubble_root)
+
+        var bubble = PanelContainer.new()
+        bubble.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        var bstyle = StyleBoxFlat.new()
+        bstyle.bg_color = Color(0.95, 0.92, 0.82)
+        bstyle.corner_radius_top_left = 10
+        bstyle.corner_radius_top_right = 10
+        bstyle.corner_radius_bottom_left = 10
+        bstyle.corner_radius_bottom_right = 10
+        bstyle.content_margin_left = 12
+        bstyle.content_margin_right = 12
+        bstyle.content_margin_top = 8
+        bstyle.content_margin_bottom = 8
+        bstyle.border_width_top = 3
+        bstyle.border_width_bottom = 3
+        bstyle.border_width_left = 3
+        bstyle.border_width_right = 3
+        bstyle.border_color = Color(0.7, 0.55, 0.2)
+        bubble.add_theme_stylebox_override("panel", bstyle)
+        bubble_root.add_child(bubble)
+
+        var tip = Label.new()
+        tip.text = "보상이 늘어나고\n특별한 무언가를 발견할지도..."
+        tip.add_theme_font_size_override("font_size", 18)
+        tip.add_theme_color_override("font_color", Color(0.2, 0.15, 0.05))
+        tip.add_theme_color_override("font_outline_color", Color(0.7, 0.55, 0.2))
+        tip.add_theme_constant_override("outline_size", 2)
+        tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        bubble.add_child(tip)
+
+        var arrow = Label.new()
+        arrow.text = "▼"
+        arrow.add_theme_font_size_override("font_size", 14)
+        arrow.add_theme_color_override("font_color", Color(0.95, 0.92, 0.82))
+        arrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        bubble_root.add_child(arrow)
+
+        var _reposition = func():
+          if str_btn.size.x > 0 and bubble_root.size.y > 0:
+            bubble_root.position = Vector2(
+              (str_btn.size.x - bubble_root.size.x) * 0.5 + str_btn.size.x * 0.5,
+              -bubble_root.size.y - 4
+            )
+        bubble_root.resized.connect(_reposition)
+        str_btn.resized.connect(_reposition)
 
     if not unlocked:
       var status_vbox = VBoxContainer.new()

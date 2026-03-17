@@ -59,6 +59,7 @@ func reset_all_data() -> void:
   GameManager.unlocked_gem_skills = []
   GameManager.world_strength_levels = {}
   GameManager.collected_gem_levels = {}
+  GameManager.has_ever_transcended = false
   GameManager.money_changed.emit(0)
   WeaponManager.current_weapon_level = 0
   WeaponManager.weapon_changed.emit(0)
