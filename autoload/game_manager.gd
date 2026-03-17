@@ -180,6 +180,7 @@ signal boss_key_collected(world_index: int)
 var fury: float = 0.0
 var fury_boss_alive: bool = false
 var session_key_acquired: int = -1
+var session_crown_acquired: bool = false
 const FURY_THRESHOLDS: Array = [300.0, 1500.0, 6000.0, 18750.0, 90000.0, 148000.0, 248000.0]
 
 func get_fury_max() -> float:
@@ -1247,6 +1248,7 @@ func reset_session_data() -> void:
   hit_penalty_active = false
   fury = 0.0
   session_key_acquired = -1
+  session_crown_acquired = false
   session_boss_reward = 0
   session_gems = 0
   session_money_changed.emit(0)
