@@ -178,13 +178,25 @@ signal boss_key_collected(world_index: int)
 var fury: float = 0.0
 var fury_boss_alive: bool = false
 var session_key_acquired: int = -1
-const FURY_THRESHOLDS: Array = [300.0, 1200.0, 6000.0, 18750.0, 90000.0, 148000.0, 248000.0]
+const FURY_THRESHOLDS: Array = [300.0, 1500.0, 6000.0, 18750.0, 90000.0, 148000.0, 248000.0]
 
 func get_fury_max() -> float:
   var idx = clampi(selected_world, 0, FURY_THRESHOLDS.size() - 1)
   var base = FURY_THRESHOLDS[idx]
   var strength = get_world_strength_level(selected_world)
-  return base * (1.0 + strength * 0.3)
+  if strength == 0:
+    return base
+  var ref_idx = idx + 2
+  if ref_idx >= FURY_THRESHOLDS.size():
+    return base * (1.0 + strength * 0.3)
+  var target = FURY_THRESHOLDS[ref_idx]
+  var gap = target - base
+  if strength == 1:
+    return target
+  elif strength == 2:
+    return target + gap
+  else:
+    return target + gap + gap * 1.46
 
 var _sfx_click: AudioStreamPlayer
 var _sfx_confirm: AudioStreamPlayer
