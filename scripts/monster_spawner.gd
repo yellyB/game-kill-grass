@@ -3,6 +3,8 @@ extends Node2D
 const MonsterScene = preload("res://scenes/world/monster.tscn")
 const ChestScene = preload("res://scenes/world/chest.tscn")
 
+const BOSS_NAMES: Array = ["슬라임", "멧돼지", "잔디 기사", "마도사", "수정 사슴", "잔디 골렘", "드래곤"]
+
 const FURY_BOSS_TYPES: Dictionary = {
   0: {
     "type": "slime",
@@ -149,6 +151,7 @@ func _on_fury_boss_requested() -> void:
     return
   var config = FURY_BOSS_TYPES[world].duplicate()
   config["is_fury_boss"] = true
+  config["boss_name"] = BOSS_NAMES[world] if world < BOSS_NAMES.size() else ""
   var is_last = world + 1 >= GameManager.WORLD_UNLOCK_COSTS.size()
   if _is_world_cleared(world):
     var reward = BOSS_CLEAR_REWARDS[world] if world < BOSS_CLEAR_REWARDS.size() else 0
@@ -188,3 +191,4 @@ func _play_boss_entrance(monster: Node2D) -> void:
   monster.is_boss_entering = false
   monster.process_mode = Node.PROCESS_MODE_INHERIT
   get_tree().paused = false
+  monster.queue_redraw()
