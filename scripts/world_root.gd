@@ -5,9 +5,9 @@ var player: CharacterBody2D = null
 var background: ColorRect = null
 
 const WORLD_BG_COLORS: Array = [
-	Color(0.25, 0.37, 0.25, 1),
+	Color(0.20, 0.30, 0.20, 1),
 	Color(0.52, 0.45, 0.28, 1),
-	Color(0.28, 0.3, 0.36, 1),
+	Color(0.32, 0.34, 0.40, 1),
 	Color(0.24, 0.2, 0.4, 1),
 	Color(0.12, 0.32, 0.38, 1),
 	Color(0.3, 0.3, 0.2, 1),
