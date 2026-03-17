@@ -136,7 +136,7 @@ func _spawn_chest_at_chunk(chunk_coord: Vector2i) -> void:
 
 const BOSS_CLEAR_REWARDS: Array = [50, 700, 3000, 15000, 50000, 140000, 350000]
 
-const LAST_WORLD_POTION: String = "졸음 약"
+const LAST_WORLD_POTION: String = "황금 왕관"
 
 func _is_world_cleared(world: int) -> bool:
   return GameManager.is_world_cleared(world)
