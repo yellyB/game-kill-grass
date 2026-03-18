@@ -155,8 +155,11 @@ func _on_fury_boss_requested() -> void:
   var is_last = world + 1 >= GameManager.WORLD_UNLOCK_COSTS.size()
   if _is_world_cleared(world):
     var reward = BOSS_CLEAR_REWARDS[world] if world < BOSS_CLEAR_REWARDS.size() else 0
-    config["boss_reward"] = reward
     var strength = GameManager.get_world_strength_level(world)
+    if strength > 0:
+      var mult = GameManager.STRENGTH_MULTIPLIERS[clampi(strength, 0, GameManager.STRENGTH_MULTIPLIERS.size() - 1)]
+      reward = int(reward * mult)
+    config["boss_reward"] = reward
     if strength > 0 and not GameManager.has_collected_gems(world, strength):
       config["boss_gems"] = strength
   elif is_last:
