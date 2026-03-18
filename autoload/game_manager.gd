@@ -779,6 +779,7 @@ const SKILL_PREREQS = {
 }
 
 const SKILL_REQUIRED_TOTAL = {
+  "attack_count:1": 7,
   "attack_count:2": 3,
   "crit_damage:2": 3,
   "monster_damage:1": 30,
