@@ -390,4 +390,11 @@ func _show_powerup_notification(type: String, level: int) -> void:
   tween.tween_property(hbox, "modulate:a", 1.0, 0.2)
   tween.tween_interval(1.5)
   tween.tween_property(hbox, "modulate:a", 0.0, 0.5)
+  tween.tween_callback(func():
+    var h = hbox.size.y
+    for child in hbox.get_children():
+      child.free()
+    hbox.custom_minimum_size.y = h
+  )
+  tween.tween_property(hbox, "custom_minimum_size:y", 0.0, 0.2)
   tween.tween_callback(hbox.queue_free)
