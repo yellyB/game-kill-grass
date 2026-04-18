@@ -39,6 +39,7 @@ var collision_base_scale: float = 0.0
 var collision_rotation: float = 0.0
 var key_world_index: int = -1
 var boss_reward: int = 0
+var _cached_player: Node2D = null
 var boss_gems: int = 0
 var boss_potion: String = ""
 var is_fury_boss: bool = false
@@ -125,7 +126,9 @@ func _process(delta: float) -> void:
     knockback_velocity = knockback_velocity.lerp(Vector2.ZERO, KNOCKBACK_FRICTION * delta)
     return
 
-  var player = get_tree().get_first_node_in_group("player")
+  if not is_instance_valid(_cached_player):
+    _cached_player = get_tree().get_first_node_in_group("player")
+  var player = _cached_player
   if player:
     var player_local = get_parent().to_local(player.global_position)
     var dir = (player_local - position).normalized()
@@ -272,7 +275,9 @@ func _drop_boss_reward() -> void:
       get_parent().add_child(coin)
 
   if boss_gems > 0:
-    var player = get_tree().get_first_node_in_group("player")
+    if not is_instance_valid(_cached_player):
+      _cached_player = get_tree().get_first_node_in_group("player")
+    var player = _cached_player
     if player:
       for i in boss_gems:
         var item = DroppedItemScene.instantiate()
@@ -285,7 +290,9 @@ func _drop_boss_reward() -> void:
   )
 
 func _drop_potion() -> void:
-  var player = get_tree().get_first_node_in_group("player")
+  if not is_instance_valid(_cached_player):
+    _cached_player = get_tree().get_first_node_in_group("player")
+  var player = _cached_player
   if not player:
     return
   var item = DroppedItemScene.instantiate()
@@ -295,7 +302,9 @@ func _drop_potion() -> void:
   get_parent().add_child(item)
 
 func _drop_key() -> void:
-  var player = get_tree().get_first_node_in_group("player")
+  if not is_instance_valid(_cached_player):
+    _cached_player = get_tree().get_first_node_in_group("player")
+  var player = _cached_player
   if not player:
     return
   var item = DroppedItemScene.instantiate()
