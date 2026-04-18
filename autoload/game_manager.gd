@@ -747,7 +747,7 @@ func get_monster_knockback_strength() -> float:
   return BASE_KNOCKBACK
 
 func get_grass_drop_chance() -> float:
-  return GRASS_DROP_CHANCE + upgrade_levels.get("grass_drop", 0) * 0.06
+  return GRASS_DROP_CHANCE
 
 func get_total_skill_level() -> int:
   var total = 0
@@ -758,7 +758,7 @@ func get_total_skill_level() -> int:
   return total
 
 func get_grass_reward_multiplier() -> float:
-  return 1.0 + upgrade_levels.get("grass_reward", 0) * 0.4
+  return 1.0
 
 const WEAPON_SKILL_REQUIREMENTS = [0, 0, 2, 4, 7, 11, 16, 21, 27, 34]
 
@@ -1131,9 +1131,6 @@ func purchase_upgrade(upgrade_type: String) -> bool:
       WeaponManager.weapon_changed.emit(next_level)
   upgrade_purchased.emit(upgrade_type, next_level)
   return true
-
-func get_part_penalty_mult() -> float:
-  return 1.0 - upgrade_levels.get("penalty_reduce", 0) * 0.25
 
 func add_key(world_index: int) -> void:
   if world_index not in owned_keys:
