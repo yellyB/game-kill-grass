@@ -23,10 +23,6 @@ const FRAME_DURATION: float = 0.18
 var frame_timer: float = 0.0
 var sequence_index: int = 0
 var anim_sequence: Array = [0, 1, 2, 3, 4]
-var is_moving: bool = false
-
-var wander_direction: Vector2 = Vector2.ZERO
-var wander_timer: float = 0.0
 var wander_speed: float = 40.0
 
 var max_health: int = 1
@@ -86,7 +82,6 @@ func _ready() -> void:
     if collision_base_scale > 0 and abs(sprite_scale - collision_base_scale) > 0.001:
       var s = sprite_scale / collision_base_scale
       hit_shape.scale = Vector2(s, s)
-  _pick_new_wander()
   if effect_scene_path != "":
     var scene = load(effect_scene_path)
     if scene:
@@ -143,16 +138,6 @@ func _advance_frame() -> void:
   var frame_index = anim_sequence[sequence_index]
   if frame_index < textures.size():
     sprite.texture = textures[frame_index]
-
-func _pick_new_wander() -> void:
-  if randf() < 0.4:
-    is_moving = false
-    wander_timer = randf_range(1.5, 3.0)
-  else:
-    is_moving = true
-    wander_direction = Vector2(randf_range(-1, 1), randf_range(-1, 1)).normalized()
-    wander_timer = randf_range(1.0, 2.5)
-  sequence_index = 0
 
 var is_dead: bool = false
 var knockback_velocity: Vector2 = Vector2.ZERO
