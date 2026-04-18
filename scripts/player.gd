@@ -429,43 +429,6 @@ func _on_monster_hit(monster: Node2D) -> void:
   player_hit.emit()
   _show_hit_overlay()
 
-func _drop_penalty_coins(penalty: int) -> void:
-  var coin_count = randi_range(7, 10)
-  for i in coin_count:
-    _spawn_scatter_coin()
-  if penalty <= 0 or GameManager.session_money <= 0:
-    return
-  penalty = mini(penalty, GameManager.session_money)
-  GameManager.add_money(-penalty)
-  var penalty_text = FloatingTextScene.instantiate()
-  penalty_text.position = Vector2(0, -70)
-  add_child(penalty_text)
-  penalty_text.setup_penalty(penalty)
-
-func _spawn_scatter_coin() -> void:
-  var coin = Node2D.new()
-  coin.position = Vector2.ZERO
-  coin.z_index = 10
-  add_child(coin)
-
-  var poly = Polygon2D.new()
-  var points: PackedVector2Array = []
-  for j in 10:
-    var angle = TAU / 10.0 * j
-    points.append(Vector2(cos(angle), sin(angle)) * 12.0)
-  poly.polygon = points
-  poly.color = Color(1.0, 0.85, 0.0)
-  coin.add_child(poly)
-
-  var dir = Vector2(randf_range(-1, 1), randf_range(-1, 1)).normalized()
-  var fly_dist = randf_range(80, 160)
-  var target = coin.position + dir * fly_dist
-
-  var tw = create_tween()
-  tw.tween_property(coin, "position", target, 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
-  tw.tween_property(coin, "modulate:a", 0.0, 0.3)
-  tw.tween_callback(coin.queue_free)
-
 func _show_hit_overlay() -> void:
   _remove_hit_overlay()
   _hit_overlay_canvas = CanvasLayer.new()
