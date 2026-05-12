@@ -1482,7 +1482,7 @@ func _on_confirm_pressed() -> void:
     var next_level = current_level + 1
     if GameManager.unlock_gem_skill(selected_type, next_level):
       GameManager.play_skill_upgrade_sound()
-      Input.vibrate_handheld(50)
+      GameManager.vibrate(50)
       build_skill_tree()
       clear_selection()
       update_money_display()
@@ -1491,7 +1491,7 @@ func _on_confirm_pressed() -> void:
   var prev_sub = GameManager.get_upgrade_sub_level(selected_type)
   if GameManager.purchase_upgrade(selected_type):
     GameManager.play_skill_upgrade_sound()
-    Input.vibrate_handheld(50)
+    GameManager.vibrate(50)
     SaveManager.save_game()
 
     var cur_sub = GameManager.get_upgrade_sub_level(selected_type)

@@ -180,7 +180,7 @@ func _on_fury_boss_spawned() -> void:
   fury_hidden = true
 
   if OS.has_feature("mobile"):
-    Input.vibrate_handheld(200)
+    GameManager.vibrate(200)
 
   var fade_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
   fade_tween.tween_property(fury_hbox, "modulate:a", 0.0, 0.8)

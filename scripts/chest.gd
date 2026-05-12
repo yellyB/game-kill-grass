@@ -24,12 +24,13 @@ func die() -> void:
 	remove_from_group("field_objects")
 	set_process(false)
 
-	var sfx = AudioStreamPlayer.new()
-	sfx.stream = SFX_BREAK
-	sfx.volume_db = -3.0
-	get_tree().root.add_child(sfx)
-	sfx.play()
-	sfx.finished.connect(sfx.queue_free)
+	if GameManager.sfx_enabled:
+		var sfx = AudioStreamPlayer.new()
+		sfx.stream = SFX_BREAK
+		sfx.volume_db = -3.0
+		get_tree().root.add_child(sfx)
+		sfx.play()
+		sfx.finished.connect(sfx.queue_free)
 
 	var tween = create_tween()
 	tween.set_parallel(true)

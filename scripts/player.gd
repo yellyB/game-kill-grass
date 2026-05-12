@@ -228,7 +228,7 @@ func try_attack() -> void:
   if result.fury > 0:
     GameManager.add_fury(result.fury)
 
-  if result.hit:
+  if result.hit and GameManager.sfx_enabled:
     sfx_grass_player.play()
 
   if result.crit:
@@ -421,7 +421,8 @@ func _unhandled_input(event: InputEvent) -> void:
         touch_direction = Vector2.ZERO
 
 func accumulate_coin_text(value: int) -> void:
-  sfx_coin_player.play()
+  if GameManager.sfx_enabled:
+    sfx_coin_player.play()
   if batch_active and is_instance_valid(batch_floating_text):
     batch_total += value
     batch_timer = BATCH_TIMEOUT

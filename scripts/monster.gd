@@ -171,7 +171,7 @@ func play_boss_entrance() -> void:
   hit_area.set_deferred("monitoring", false)
   hit_area.set_deferred("monitorable", false)
 
-  Input.vibrate_handheld(1000)
+  GameManager.vibrate(1000)
 
   var tween = create_tween()
   tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
@@ -194,7 +194,8 @@ func take_damage(amount: int, from_global_pos: Variant = null) -> void:
   if is_dead or is_boss_entering:
     return
   health -= amount
-  sfx_hit.play()
+  if GameManager.sfx_enabled:
+    sfx_hit.play()
   if from_global_pos is Vector2:
     var knock_dir = (global_position - from_global_pos).normalized()
     knockback_velocity = knock_dir * GameManager.get_monster_knockback_strength()
@@ -218,12 +219,13 @@ func die() -> void:
   remove_from_group("monsters")
   set_process(false)
 
-  var sfx = AudioStreamPlayer.new()
-  sfx.stream = SFX_DEATH
-  sfx.volume_db = -3.0
-  get_tree().root.add_child(sfx)
-  sfx.play()
-  sfx.finished.connect(sfx.queue_free)
+  if GameManager.sfx_enabled:
+    var sfx = AudioStreamPlayer.new()
+    sfx.stream = SFX_DEATH
+    sfx.volume_db = -3.0
+    get_tree().root.add_child(sfx)
+    sfx.play()
+    sfx.finished.connect(sfx.queue_free)
 
   if effect_node and effect_node.has_method("burst"):
     effect_node.burst(3)
