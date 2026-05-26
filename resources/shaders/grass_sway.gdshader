@@ -21,7 +21,12 @@ void vertex() {
 }
 
 void fragment() {
-	if (COLOR.a < 0.9) {
+
+	if (COLOR.a < 0.2) {
+		COLOR.rgb = vec3(1.0, 0.15, 0.1);
+	} else if (COLOR.a < 0.35) {
+		COLOR.rgb = vec3(1.0, 1.0, 1.0);
+	} else if (COLOR.a < 0.6) {
 		float height = UV.y;
 		vec3 gold_tip = vec3(1.0, 0.85, 0.05);
 		vec3 gold_base = vec3(0.85, 0.7, 0.02);
