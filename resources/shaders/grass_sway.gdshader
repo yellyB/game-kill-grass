@@ -22,8 +22,8 @@ void vertex() {
 
 void fragment() {
 
-	if (COLOR.a < 0.2) {
-		COLOR.rgb = vec3(1.0, 0.15, 0.1);
+	if (COLOR.a < 0.1) {
+		COLOR.rgb = vec3(1.0, 0.9, 0.2);
 	} else if (COLOR.a < 0.35) {
 		COLOR.rgb = vec3(1.0, 1.0, 1.0);
 	} else if (COLOR.a < 0.6) {

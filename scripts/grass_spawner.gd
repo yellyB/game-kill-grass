@@ -287,12 +287,18 @@ func process_regen(delta: float) -> void:
       continue
     var data = grass_data[grid_pos]
     var still_active = false
-    if data.has("hit_timer") and data.hit_timer > 0:
-      data.hit_timer -= delta
+    if data.has("crit_timer") and data.crit_timer > 0:
+      data.crit_timer -= delta
+      if data.crit_timer <= 0 and data.get("pending_particles", false):
+        _spawn_instant_kill_particles(Vector2(grid_pos.x, grid_pos.y))
+        data.pending_particles = false
       still_active = true
       _mark_chunk_dirty(grid_pos)
-    if data.has("instant_kill_timer") and data.instant_kill_timer > 0:
-      data.instant_kill_timer -= delta
+    if data.has("hit_timer") and data.hit_timer > 0:
+      data.hit_timer -= delta
+      if data.hit_timer <= 0 and data.get("pending_particles", false):
+        _spawn_instant_kill_particles(Vector2(grid_pos.x, grid_pos.y))
+        data.pending_particles = false
       still_active = true
       _mark_chunk_dirty(grid_pos)
     if data.has("hp_bar_timer") and data.hp_bar_timer > 0:
@@ -351,25 +357,39 @@ func update_multimesh() -> void:
 
   var visible_grass: Array = []
   var colors_list: Array = []
+  var scales_list: Array = []
   var golden_positions: Array = []
 
   for grid_pos in grass_data:
     var data = grass_data[grid_pos]
     if data.cut:
-      if data.get("instant_kill_timer", 0.0) > 0:
+      if data.get("crit_timer", 0.0) > 0:
         var world_pos = Vector2(grid_pos.x, grid_pos.y)
         visible_grass.append(world_pos)
-        colors_list.append(Color(1.0, 1.0, 1.0, 0.15))
+        colors_list.append(Color(1.0, 1.0, 1.0, 0.05))
+        var progress = 1.0 - (data.crit_timer / 0.2)
+        scales_list.append(1.0 + progress * 0.8)
+      elif data.get("hit_timer", 0.0) > 0:
+        var world_pos = Vector2(grid_pos.x, grid_pos.y)
+        visible_grass.append(world_pos)
+        colors_list.append(Color(1.0, 1.0, 1.0, 0.25))
+        scales_list.append(1.0)
       continue
 
     var world_pos = Vector2(grid_pos.x, grid_pos.y)
     visible_grass.append(world_pos)
 
-    if data.has("hit_timer") and data.hit_timer > 0:
+    if data.has("crit_timer") and data.crit_timer > 0:
+      colors_list.append(Color(1.0, 1.0, 1.0, 0.05))
+      var progress = 1.0 - (data.crit_timer / 0.2)
+      scales_list.append(1.0 + progress * 0.8)
+    elif data.has("hit_timer") and data.hit_timer > 0:
       var flash_alpha = 0.5 if data.type == 5 else 0.25
       colors_list.append(Color(1.0, 1.0, 1.0, flash_alpha))
+      scales_list.append(1.0)
     else:
       colors_list.append(_get_grass_color(data.type))
+      scales_list.append(1.0)
 
     if data.type == 5:
       golden_positions.append(world_pos)
@@ -378,6 +398,9 @@ func update_multimesh() -> void:
 
   for i in visible_grass.size():
     var t = Transform2D()
+    var s = scales_list[i]
+    if s != 1.0:
+      t = t.scaled(Vector2(s, s))
     t.origin = visible_grass[i]
     multimesh.set_instance_transform_2d(i, t)
     multimesh.set_instance_color(i, colors_list[i])
@@ -457,7 +480,10 @@ func attack_grass_in_area(center: Vector2, radius: float) -> Dictionary:
     hit_count += 1
     var hp_before = data.health
     data.health -= damage
-    data.hit_timer = 0.1
+    if is_crit:
+      data.crit_timer = 0.2
+    else:
+      data.hit_timer = 0.1
     _add_active_timer(grid_pos)
     if data.health > 0:
       data.hp_bar_timer = 1.5
@@ -465,8 +491,9 @@ func attack_grass_in_area(center: Vector2, radius: float) -> Dictionary:
     if data.health <= 0:
       var is_instant_kill = (hp_before == data.max_health)
       if is_instant_kill:
-        data.instant_kill_timer = 0.15
-        _add_active_timer(grid_pos)
+        data.pending_particles = true
+        if not is_crit:
+          data.hit_timer = 0.15
       data.cut = true
       data.regen_timer = 0.0
       _mark_grass_cut(grid_pos)
@@ -530,13 +557,34 @@ func _crit_kill_percent(center: Vector2, radius: float, percent: float, exclude:
   for i in mini(kill_count, candidates.size()):
     var grid_pos = candidates[i]
     var data = grass_data[grid_pos]
-    data.instant_kill_timer = 0.15
+    data.crit_timer = 0.2
+    data.pending_particles = true
     _add_active_timer(grid_pos)
     data.cut = true
     data.regen_timer = 0.0
     _mark_grass_cut(grid_pos)
     results.append({"grid_pos": grid_pos, "value": data.value, "type": data.type})
   return results
+
+
+func _spawn_instant_kill_particles(world_pos: Vector2) -> void:
+  var particles = CPUParticles2D.new()
+  particles.position = world_pos
+  particles.emitting = true
+  particles.one_shot = true
+  particles.amount = 8
+  particles.lifetime = 0.4
+  particles.explosiveness = 1.0
+  particles.direction = Vector2(0, -1)
+  particles.spread = 45.0
+  particles.initial_velocity_min = 80.0
+  particles.initial_velocity_max = 150.0
+  particles.gravity = Vector2(0, 300)
+  particles.scale_amount_min = 4.0
+  particles.scale_amount_max = 7.0
+  particles.color = Color(1.0, 0.9, 0.2)
+  particles.finished.connect(particles.queue_free)
+  add_child(particles)
 
 
 func _on_golden_bloom() -> void:
