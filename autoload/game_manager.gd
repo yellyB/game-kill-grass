@@ -179,6 +179,7 @@ signal blackhole_requested()
 signal fury_changed(value: float)
 signal fury_boss_requested()
 signal fury_gauge_dismissed()
+signal fury_feed_requested(amount: float, screen_pos: Vector2)
 signal boss_key_collected(world_index: int)
 
 var fury: float = 0.0

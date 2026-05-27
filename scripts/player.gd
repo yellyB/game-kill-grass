@@ -220,24 +220,11 @@ func try_attack() -> void:
   attack_timer.wait_time = wait
   attack_timer.start()
 
-  _attack_monsters_in_area(attack_center, attack_radius)
+  var swing_dir = input_direction
+  var target_pos = attack_center + swing_dir * 30
+  swing_weapon(target_pos, swing_dir)
 
-  var local_attack_center = attack_center - grass_spawner.global_position
-  var result = grass_spawner.attack_grass_in_area(local_attack_center, attack_radius)
-
-  if result.fury > 0:
-    GameManager.add_fury(result.fury)
-
-  if result.hit and GameManager.sfx_enabled:
-    sfx_grass_player.play()
-
-  if result.crit:
-    _spawn_crit_effect(input_direction)
-
-  var target_pos = attack_center + input_direction * 30
-  swing_weapon(target_pos)
-
-  _spawn_weapon_effect(input_direction)
+  _spawn_weapon_effect(swing_dir)
 
 func _has_targets_in_range(center: Vector2, radius: float) -> bool:
   if attack_area.get_overlapping_areas().size() > 0:
@@ -262,7 +249,7 @@ func _has_targets_in_range(center: Vector2, radius: float) -> bool:
           return true
   return false
 
-func swing_weapon(target_pos: Vector2) -> void:
+func swing_weapon(target_pos: Vector2, swing_dir: Vector2) -> void:
   is_swinging = true
 
   current_anim_state = "attack"
@@ -297,6 +284,28 @@ func swing_weapon(target_pos: Vector2) -> void:
 
   await tween.finished
   is_swinging = false
+
+  _apply_attack_damage(swing_dir)
+
+func _apply_attack_damage(swing_dir: Vector2) -> void:
+  if not grass_spawner:
+    return
+  var attack_center = global_position
+
+  _attack_monsters_in_area(attack_center, attack_radius)
+
+  var local_attack_center = attack_center - grass_spawner.global_position
+  var result = grass_spawner.attack_grass_in_area(local_attack_center, attack_radius)
+
+  if result.hit and GameManager.sfx_enabled:
+    sfx_grass_player.play()
+
+  if result.crit:
+    _spawn_crit_effect(swing_dir)
+
+  if result.fury > 0:
+    var screen_pos = get_viewport().get_canvas_transform() * attack_center
+    GameManager.fury_feed_requested.emit(result.fury, screen_pos)
 
 func update_attack_range() -> void:
   var base_range = GameManager.get_attack_range()
