@@ -774,8 +774,6 @@ func get_total_skill_level() -> int:
 func get_grass_reward_multiplier() -> float:
   return 1.0
 
-const WEAPON_SKILL_REQUIREMENTS = [0, 0, 2, 4, 7, 11, 16, 21, 27, 34]
-
 const SKILL_PREREQS = {
   "attack_speed:1": [{"type": "attack_power", "level": 1}],
   "attack_range:1": [{"type": "attack_power", "level": 1}],
@@ -875,11 +873,6 @@ func get_skill_def(type: String) -> Dictionary:
     if def.type == type:
       return def
   return {}
-
-func get_weapon_skill_requirement(weapon_level: int) -> int:
-  if weapon_level < 0 or weapon_level >= WEAPON_SKILL_REQUIREMENTS.size():
-    return 0
-  return WEAPON_SKILL_REQUIREMENTS[weapon_level]
 
 func get_grass_regen_time(base_time: float) -> float:
   var level = upgrade_levels.get("grass_regen", 0)
