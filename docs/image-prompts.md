@@ -326,3 +326,37 @@
 > 1-6: Exact same poses as Row 1 but showing the character's back. Back of green cap, back of white shirt, brown lower half. NO face visible. All arm/leg positions match Row 1 from rear view.
 >
 > Total: 12 frames, 2 rows x 6 columns. Each cell 128x128 pixels. Transparent background. Thick black outline, flat colors, extremely minimal detail. Every single frame faces DIRECTLY forward or DIRECTLY backward.
+
+---
+
+## 무기 아이콘
+
+### 1단계: 나뭇가지
+> A thin, slightly curved brown tree branch. 2-3 dried leaves attached near the tip. Bark texture on the surface. Simple and shabby looking. Held from the bottom, tip pointing up. Oriented straight vertical. Game item icon, top-down perspective, transparent background
+
+### 2단계: 녹슨 식칼
+> A rusty kitchen knife. Silver blade with reddish-brown rust patches scattered across it. Brown wooden handle at the bottom, blade pointing up. The blade tip is slightly dull and rounded. Oriented straight vertical. Game item icon, top-down perspective, transparent background
+
+### 3단계: 피자 커터
+> A pizza cutter wheel. Red plastic handle at the bottom, shiny stainless steel circular rotating blade on top. The blade surface is reflective and gleaming. Oriented straight vertical. Game item icon, top-down perspective, transparent background
+
+### 4단계: 전기 파리채
+> An electric fly swatter. Yellow plastic handle at the bottom, tennis racket shaped head with metal wire grid on top. Blue electric sparks crackling between the wires. Oriented straight vertical. Game item icon, top-down perspective, transparent background
+
+### 5단계: 뜨거운 다리미
+> A classic steam iron. Handle at the bottom, gray metal soleplate glowing red-hot facing up. White body. Steam rising from the top vents. Oriented straight vertical. Game item icon, top-down perspective, transparent background
+
+### 6단계: 매우 화난 고양이
+> A very angry orange tabby cat. Held by the body from the bottom, front paws with claws out pointing up. All fur standing on end, bristled. Wide furious eyes with bared teeth and fangs. Oriented straight vertical. Game item icon, top-down perspective, transparent background
+
+### 7단계: 체인소
+> A chainsaw. Grip handle at the bottom, long gray guide bar with saw chain extending upward. Orange and black two-tone body. Black exhaust pipe at the rear. Oriented straight vertical. Game item icon, top-down perspective, transparent background
+
+### 8단계: 마법 지팡이
+> A magic wand staff. Grip at the bottom, long dark purple wooden rod pointing up. A glowing purple gemstone embedded at the top. Small glowing light particles floating around the gem. Oriented straight vertical. Game item icon, top-down perspective, transparent background
+
+### 9단계: 날개달린 선풍기
+> A fan with angel wings. Handle at the bottom, blue circular fan body on top. White feathered angel wings spread on both sides. Glowing yellow light in the center. Three exposed metal fan blades with no safety cage. Oriented straight vertical. Game item icon, top-down perspective, transparent background
+
+### 10단계: 위성 레이저 제초기
+> A small silver metallic remote control device. Held from the bottom, short antenna pointing up. A red button in the center. A small holographic satellite floating above the remote. Oriented straight vertical. Game item icon, top-down perspective, transparent background
